@@ -442,10 +442,19 @@ export default class BaseGameScene extends Phaser.Scene {
             return textObject;
         }
 
-        // --- ケース2: タイプが 'Sprite' の場合 (変更なし) ---
         if (layout.type === 'Sprite') {
-            const textureKey = layout.texture || '__DEFAULT';
-            return new Phaser.GameObjects.Sprite(this, 0, 0, textureKey);
+            const spriteTexture = layout.texture || '__DEFAULT';
+            return new Phaser.GameObjects.Sprite(this, 0, 0, spriteTexture);
+        }
+        if (layout.type === 'Rectangle') {
+            const rect = new Phaser.GameObjects.Rectangle(this, 0, 0, layout.width || 128, layout.height || 128, layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+            rect.setFillStyle(layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+            return rect;
+        }
+        if (layout.type === 'Circle') {
+            const circle = new Phaser.GameObjects.Circle(this, 0, 0, layout.radius || 64, layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+            circle.setFillStyle(layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+            return circle;
         }
 
         // --- ケース3: デフォルト (Image) の場合 (変更なし) ---
