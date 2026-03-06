@@ -1,0 +1,82 @@
+{
+    "scene_settings": {
+        "backgroundColor": "0x1a2530"
+    },
+    "hasJoystick": false,
+    "layers": [
+        {
+            "name": "UI",
+            "visible": true,
+            "locked": false
+        },
+        {
+            "name": "Gameplay",
+            "visible": true,
+            "locked": false
+        },
+        {
+            "name": "Background",
+            "visible": true,
+            "locked": false
+        }
+    ],
+    "objects": [
+        {
+            "name": "bg_wall",
+            "type": "Rectangle",
+            "x": 640,
+            "y": 360,
+            "width": 1280,
+            "height": 720,
+            "fillColor": "0x263238",
+            "depth": -10,
+            "layer": "Background",
+            "events": [],
+            "components": []
+        },
+        {
+            "name": "character",
+            "type": "Rectangle",
+            "x": 300,
+            "y": 80,
+            "width": 40,
+            "height": 40,
+            "fillColor": "0x3498db",
+            "depth": 5,
+            "layer": "Gameplay",
+            "physics": {
+                "type": "rectangle",
+                "width": 40,
+                "height": 40,
+                "isStatic": false,
+                "restitution": 0.2,
+                "friction": 0.5,
+                "label": "character"
+            },
+            "events": [],
+            "components": []
+        },
+        {
+            "name": "treasure",
+            "type": "Rectangle",
+            "x": 1000,
+            "y": 650,
+            "width": 50,
+            "height": 50,
+            "fillColor": "0xf1c40f",
+            "depth": 5,
+            "layer": "Gameplay",
+            "physics": {
+                "type": "rectangle",
+                "width": 50,
+                "height": 50,
+                "isStatic": true,
+                "isSensor": true,
+                "label": "treasure"
+            },
+            "events": [],
+            "components": []
+        }
+    ],
+    "animations": []
+}

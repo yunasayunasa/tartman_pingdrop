@@ -1,6 +1,27 @@
 {
-  "initialState": "Title",
+  "initialState": "PuzzleGame",
   "states": {
+    "PuzzleGame": {
+      "onEnter": [
+        {
+          "type": "transitionTo",
+          "params": {
+            "scene": "PuzzleScene",
+            "stage": 1
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "event": "GAME_CLEAR",
+          "to": "Title"
+        },
+        {
+          "event": "RESTART_GAME",
+          "to": "PuzzleGame"
+        }
+      ]
+    },
     "Title": {
       "onEnter": [
         {

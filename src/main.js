@@ -18,6 +18,7 @@ import JumpScene from './scenes/JumpScene.js';
 import TitleScene from './scenes/TitleScene.js';
 import GameOverScene from './scenes/GameOverScene.js';
 import TrialScene from './scenes/TrialScene.js'; // ★ 追加
+import PuzzleScene from './scenes/PuzzleScene.js';
 // ★★★ 新設：uiRegistryを自動処理する非同期関数 ★★★
 // pathから動的にモジュールをimportするため、asyncにする
 async function processUiRegistry(registry) {
@@ -79,7 +80,8 @@ const config = {
         JumpScene,
         OverlayScene,
         NovelOverlayScene,
-        TrialScene
+        TrialScene,
+        PuzzleScene
     ],
     input: {
         activePointers: 3 // 同時に3つのタッチを認識できるようにする
