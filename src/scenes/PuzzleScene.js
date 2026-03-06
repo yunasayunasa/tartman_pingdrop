@@ -154,7 +154,26 @@ export default class PuzzleScene extends BaseGameScene {
             });
         });
     }
-    // ... (middle parts remain same) ...
+    _isCharAndTarget(objA, objB, nameA, nameB) {
+        return (objA.name === nameA && objB.name === nameB) ||
+            (objA.name === nameB && objB.name === nameA);
+    }
+
+    _isCharAndTrap(objA, objB) {
+        const aIsChar = objA.name === 'character';
+        const bIsChar = objB.name === 'character';
+        const aIsTrap = (objA.name || '').startsWith('trap_');
+        const bIsTrap = (objB.name || '').startsWith('trap_');
+        return (aIsChar && bIsTrap) || (bIsChar && aIsTrap);
+    }
+
+    _isWaterAndLava(objA, objB) {
+        const aIsWater = (objA.name || '').includes('water');
+        const bIsWater = (objB.name || '').includes('water');
+        const aIsLava = (objA.name || '').includes('lava');
+        const bIsLava = (objB.name || '').includes('lava');
+        return (aIsWater && bIsLava) || (bIsWater && aIsLava);
+    }
     /**
      * 水と溶岩が反応して岩になる処理
      */
