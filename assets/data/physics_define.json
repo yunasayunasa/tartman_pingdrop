@@ -1,0 +1,14 @@
+{
+    "categories": {
+        "default": 1,
+        "player": 2,
+        "enemy": 4,
+        "wall": 8,
+        "EX1": 16,
+        "EX2": 32,
+        "EX3": 64,
+        "EX4":128,
+        "EX5":256,
+        "HIDDEN": 512
+    }
+}

@@ -1,0 +1,33 @@
+{
+  "objects": [
+    {
+      "name": "menu_background",
+      "registryKey": "panel", 
+      "x": 640,
+      "y": 360,
+      "width": 500,
+      "height": 400,
+      "alpha": 0.8
+    },
+    {
+      "name": "resume_button",
+      "registryKey": "generic_button",
+      "x": 640,
+      "y": 360,
+      "label": "ゲームに戻る",
+      "events": [
+        {
+          "trigger": "onClick",
+          "id": "event_close_menu",
+          "nodes": [
+            {
+              "id": "node_close_menu",
+              "type": "close_menu",
+              "params": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

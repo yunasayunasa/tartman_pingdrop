@@ -1,0 +1,1188 @@
+
+<!-- manual.html -->
+ <!-- ====================================================================== -->
+<!--  オブジェクトの「正体」について                                      -->
+<!-- ====================================================================== -->
+
+<h2>オブジェクトの「正体」を決める：グループと物理のルール</h2>
+<p>
+    Odyssey Engineでは、オブジェクトに2つの重要な「正体」を設定します。<br>
+    それは<b>「グループ（仲間）」</b>と<b>「物理（カタさ）」</b>です。この2つを使い分けることで、複雑で面白いゲームのルールを作ることができます。
+</p>
+
+<hr>
+
+<h3>1. オブジェクトグループ (`group`)</h3>
+<p>
+    これは、オブジェクトに付ける<b>「チーム名」</b>や<b>「あだな」</b>のようなものです。エディタとゲームの物語を作るために使います。
+</p>
+<p><b>役割:</b></p>
+<ul>
+    <li><b>エディタでの操作:</b> 同じ<code>group</code>名を持つオブジェクトを、ダブルタップでまとめて選択したり、移動させたりできます。床タイルや敵の群れなど、たくさんのオブジェクトを一度に扱うのに非常に便利です。</li>
+    <li><b>イベントの相手指定:</b> イベントエディタの<code>targetGroup</code>（相手のグループ）で使います。「どのチーム名の相手と出会ったら、何が起きるか」という物語のルールを作るための、最も重要なキーワードになります。</li>
+</ul>
+<p><b>設定場所:</b> プロパティパネルの<code>Group</code>入力欄</p>
+<p><b>例:</b></p>
+<pre><code>
+; プレイヤーが "exit_door" グループのオブジェクトに触れたら...
+; トリガー: onOverlap_Start
+; 相手のグループ: exit_door
+; アクション: [transition_scene scene=Stage2]
+</code></pre>
+
+<hr>
+
+<h3>2. 物理設定（カテゴリと衝突相手）</h3>
+<p>
+    これは、オブジェクトの<b>「カタさ」</b>や<b>「世界の法則への従い方」</b>を決める、物理エンジンへの指示書です。
+</p>
+<p><b>役割:</b></p>
+<ul>
+    <li>キャラクターが床をすり抜けず、壁にぶつかるようにします。</li>
+    <li>「弾は敵には当たるが、アイテムはすり抜ける」といった、細かい当たり判定のルールを定義します。</li>
+</ul>
+<p><b>設定場所:</b> プロパティパネルの物理ボディセクション</p>
+
+<h4>A. Category (カテゴリ)</h4>
+<p>
+    オブジェクトの<b>「物理的な種族」</b>を決めます。「あなたは`プレイヤー`族ですよ」「あなたは`カベ`族ですよ」といった具合です。これはドロップダウンから選択します。
+</p>
+
+<h4>B. Collides With (衝突する相手)</h4>
+<p>
+    そのオブジェクトが<b>「どの種族とぶつかるか」</b>をチェックボックスで決めます。
+</p>
+<p><b>例: 「プレイヤーの弾」の作り方</b></p>
+<ol>
+    <li>弾オブジェクトを選択し、物理パネルを開きます。</li>
+    <li><b>Category</b>のドロップダウンから<code>player_bullet</code>を選びます。（この弾の種族は "プレイヤーの弾" になりました）</li>
+    <li><b>Collides With</b>の項目で、<code>wall</code>（カベ）と<code>enemy</code>（敵）の2つだけにチェックを入れます。</li>
+</ol>
+<p>
+    → これで、この弾は壁と敵には当たりますが、プレイヤー自身や、アイテム、他のプレイヤーの弾とは衝突しなくなります。
+</p>
+
+<hr>
+
+<h3>まとめ：2つの「正体」の使い分け</h3>
+<p>
+    この2つは目的が全く違います。両方を正しく設定することが、良いゲームを作るコツです。
+</p>
+<ul>
+    <li><b>「この床、ダブルタップで全部選択したいな」</b> → <code>group</code>に<code>floor</code>と名付けよう。</li>
+    <li><b>「この床、キャラクターが乗れるようにしたいな」</b> → 物理<b>Category</b>を<code>wall</code>にして、プレイヤーの<b>Collides With</b>で<code>wall</code>にチェックを入れよう。</li>
+    <li><b>「プレイヤーがゴールに触れたらクリアにしたい」</b>
+        <ol>
+            <li>ゴールの<code>group</code>を<code>goal</code>に設定する。</li>
+            <li>プレイヤーのイベントで、<code>onOverlap_Start</code>の相手を<code>goal</code>にする。</li>
+            <li>ゴールの物理<b>Category</b>を<code>item</code>などに設定し、プレイヤーが通り抜けられるようにする（`isSensor`でも可）。</li>
+        </ol>
+    </li>
+</ul>
+
+<hr>
+  <hr>
+
+    <h1>7. UIを「生きた」ものにする：コンポーネントシステム入門</h1>
+    <p>これまでのUIは、いわば美しい「絵」でした。しかし、Odyssey Engineの真の力は、UIを単なる絵から、ゲーム世界の出来事にリアルタイムで反応する<strong>「生きた窓」</strong>へと変えることにあります。</p>
+    <p>それを実現するのが<strong>コンポーネントシステム</strong>です。</p>
+    <p>コンポーネントとは、「機能」だけを持つ、目に見えない小さな部品です。エディタ上で、UIオブジェクト（画像やテキスト）にこれらの部品を組み合わせ（アタッチし）ていくことで、プログラミングを一切することなく、HPバーやスコア表示のような動的なUIを自由に作成できます。</p>
+
+    <h3>7.1. 基本的な考え方：「器」と「神経」と「筋肉」</h3>
+    <p>動的なUIは、3種類の要素の組み合わせで考えます。</p>
+    <ol>
+        <li><strong>器 (GameObject)</strong>: 見た目そのものです。アセットブラウザから追加した画像やテキストがこれにあたります。</li>
+        <li><strong>神経 (WatchVariableComponent)</strong>: ゲーム内の変数を監視し、変化があったら「値が変わったよ！」という信号（イベント）を発信する、目に見えない部品です。</li>
+        <li><strong>筋肉/声 (DisplayComponent)</strong>: 神経からの信号を受け取り、器の見た目（幅、テキストなど）を実際に変化させる部品です。</li>
+    </ol>
+    <p>この3つをエディタで組み合わせることで、UIは命を吹き込まれます。</p>
+
+    <h3>7.2. コンポーネント・リファレンス</h3>
+    <p>プロパティパネルの「Component」セクションから、UIオブジェクトに以下のコンポーネントをアタッチできます。</p>
+
+    <h4><code>[WatchVariableComponent]</code> - 神経</h4>
+    <p>UIに、特定のゲーム変数を監視させるための、最も重要なコンポーネントです。これ単体では見た目は何も変わりませんが、他の表示系コンポーネントと連携するための「神経」として機能します。</p>
+    <p>アタッチすると、以下のパラメータを編集できます。</p>
+    <ul>
+        <li><strong>監視する変数 (f.)</strong> (必須): どのゲーム変数の変化を監視するかを指定します。必ず<code>f.</code>から始まる形式で記述してください。
+            <ul>
+                <li>例: <code>f.player_hp</code>, <code>f.score</code>, <code>f.amunition_count</code></li>
+            </ul>
+        </li>
+    </ul>
+    <p><strong>注意:</strong> 指定した変数（例: <code>f.player_hp</code>）が存在しない、または一度も値が設定されていない場合、このコンポーネントは信号を発信しません。エラーにはなりませんが、UIは変化しないのでご注意ください。</p>
+
+    <h4><code>[BarDisplayComponent]</code> - 筋肉（バー表示）</h4>
+    <p>主に画像オブジェクトにアタッチし、HPバーや経験値バーのように機能させます。神経（<code>WatchVariableComponent</code>）から「値が変わった」という信号を受け取ると、自身の横幅のスケール（<code>scaleX</code>）を、最大値に対する割合に応じて自動で変更します。</p>
+    <p><strong>前提条件:</strong> このコンポーネントを機能させるには、同じオブジェクトに<code>WatchVariableComponent</code>もアタッチしておく必要があります。</p>
+    <p>アタッチすると、以下のパラメータを編集できます。</p>
+    <ul>
+        <li><strong>最大値の変数 (f.)</strong> (必須): バーが満タン（100%）の時の値を、どのゲーム変数から取得するか指定します。
+            <ul>
+                <li>例: <code>f.player_max_hp</code>, <code>f.next_level_exp</code></li>
+            </ul>
+        </li>
+    </ul>
+
+    <h4><code>[TextDisplayComponent]</code> - 声（テキスト表示）</h4>
+    <p>テキストオブジェクトにアタッチし、スコアや残りHPなどを数値として表示させます。神経（<code>WatchVariableComponent</code>）から「値が変わった」という信号を受け取ると、自身のテキスト内容を、指定されたテンプレートに従って自動で更新します。</p>
+    <p><strong>前提条件:</strong> このコンポーネントを機能させるには、同じオブジェクトに<code>WatchVariableComponent</code>もアタッチしておく必要があります。</p>
+    <p>アタッチすると、以下のパラメータを編集できます。</p>
+    <ul>
+        <li><strong>表示テンプレート</strong> (必須): どのようにテキストを表示するかの書式を指定します。特別なキーワード<code>{value}</code>が、神経から受け取った実際の値に自動的に置き換えられます。
+            <ul>
+                <li>例: <code>SCORE: {value}</code> → SCORE: 100</li>
+                <li>例: <code>HP: {value}</code> → HP: 85</li>
+                <li>例: <code>{value} / 100</code> → 85 / 100</li>
+                <li>例: <code>{value}</code> → 85</li>
+            </ul>
+        </li>
+    </ul>
+    
+    <h3>7.3. 実践チュートリアル：動くHPバーを作ってみよう</h3>
+    <ol>
+        <li><strong>器を準備する</strong>: アセットブラウザからHPバーの「中身」の画像（例: <code>hp_bar_fill.png</code>）をシーンに追加します。名前を<code>'player_hp_bar_fill'</code>などに変更します。</li>
+        <li><strong>神経を繋ぐ</strong>:
+            <ol>
+                <li><code>player_hp_bar_fill</code>を選択し、プロパティパネルで「Add Component」をクリックし、<code>WatchVariableComponent</code>を選択します。</li>
+                <li>表示された入力欄「監視する変数 (f.)」に、<strong><code>f.player_hp</code></strong>と入力します。</li>
+            </ol>
+        </li>
+        <li><strong>筋肉を繋ぐ</strong>:
+            <ol>
+                <li>再度「Add Component」をクリックし、今度は<code>BarDisplayComponent</code>を選択します。</li>
+                <li>表示された入力欄「最大値の変数 (f.)」に、<strong><code>f.player_max_hp</code></strong>と入力します。</li>
+            </ol>
+        </li>
+        <li><strong>（任意）背景を置く</strong>: HPバーの「枠」の画像（例: <code>hp_bar_frame.png</code>）をシーンに追加し、<code>depth</code>を調整して<code>player_hp_bar_fill</code>のすぐ後ろに配置します。</li>
+        <li><strong>テストする</strong>: シナリオやイベントで<code>[eval exp="setF('player_hp', 50)"]</code>のようなタグを実行すると、HPバーの表示が半分になるはずです。</li>
+    </ol>
+    <p>これで完成です！<br><code>TextDisplayComponent</code>を使ったスコア表示も、全く同じ手順で作成できます。このコンポーネントシステムを使いこなせば、あなたのゲームのUIは無限の可能性を秘めることになります。</p>
+<hr>
+    <h1>8. キャラクターに命を吹き込む：イベントとアニメーションの連携</h1>
+        <p>オブジェクトを動かすだけでは、キャラクターはただの「動く絵」にすぎません。Odyssey Engineの真髄は、プレイヤーの操作や状況の変化に応じて、キャラクターが生きているかのように振る舞う<strong>「インタラクティブな存在」</strong>へと昇華させることにあります。</p>
+        <p>その連携を実現するのが、<strong><code>PlayerController</code>コンポーネント</strong>と<strong>イベントエディタ</strong>です。</p>
+
+        <h3>8.1. 基本的な考え方：「脳」と「神経」と「体」</h3>
+        <p>キャラクターの挙動は、3種類の要素の連携で考えます。</p>
+        <ol>
+            <li><strong>脳 (PlayerController Component)</strong>: キー入力やジョイスティック操作を受け取り、「今は歩いている」「左を向いた」といったキャラクターの内部的な<strong>「状態(state)」</strong>と<strong>「向き(direction)」</strong>を判断します。そして、変化があった瞬間に「状態が変わったぞ！」「向きが変わったぞ！」という信号（イベント）を発信します。</li>
+            <li><strong>神経 (Event Editor)</strong>: 「脳」から発信された信号を受け取り、その信号が特定の条件（例：「状態が'walk'に変わった」）に一致するかどうかを判断し、一致した場合に「体」へ具体的な命令を伝達します。</li>
+            <li><strong>体 (GameObject & VSL Tags)</strong>: 「神経」からの命令を受け取り、<code>[anim_play]</code>タグでアニメーションを再生したり、<code>[set_flip_x]</code>タグでスプライトを反転させたりといった、実際の見た目の変化を実行します。</li>
+        </ol>
+        <p>この3つをエディタ上で設定することで、プログラミングを一切せずに、複雑なキャラクター制御を実現できます。</p>
+
+        <h3>8.2. イベントトリガー・リファレンス</h3>
+        <p><code>PlayerController</code>は、特定の状況で以下のイベントを自動的に発火させます。イベントエディタでこれらのトリガーを選択し、キャラクターの挙動を構築します。</p>
+
+        <h4><code>[onStateChange]</code> - 状態変化トリガー</h4>
+        <p>キャラクターの行動状態が変化した瞬間に発火します。<code>PlayerController</code>は内部的に<code>idle</code>, <code>walk</code>, <code>jump_up</code>, <code>fall_down</code>といった状態を持っており、このイベントはその切り替わりを検知します。</p>
+        <p>このトリガーを選択すると、以下の「条件(Condition)」が利用できます。</p>
+        <ul>
+            <li><strong>条件(Condition)</strong>: 変化後の新しい状態が何であるかを判定するための式を記述します。特別な変数<strong><code>state</code></strong>が使えます。
+                <ul>
+                    <li>例: <code>state === 'walk'</code> （状態が'walk'になった場合）</li>
+                    <li>例: <code>state === 'idle'</code> （状態が'idle'になった場合）</li>
+                </ul>
+            </li>
+        </ul>
+
+        <h4><code>[onDirectionChange]</code> - 向き変化トリガー</h4>
+        <p>キャラクターが左右の向きを変えた瞬間に発火します。</p>
+        <p>このトリガーを選択すると、以下の「条件(Condition)」が利用できます。</p>
+        <ul>
+            <li><strong>条件(Condition)</strong>: 変化後の新しい向きが何であるかを判定するための式を記述します。特別な変数<strong><code>direction</code></strong>が使えます。
+                <ul>
+                    <li>例: <code>direction === 'left'</code> （左を向いた場合）</li>
+                    <li>例: <code>direction === 'right'</code> （右を向いた場合）</li>
+                </ul>
+            </li>
+        </ul>
+        
+        <h3>8.3. 実践チュートリアル：歩き、止まり、向きを変えるキャラクターを作ろう</h3>
+        <p><strong>前提:</strong> <code>player</code>オブジェクトに<code>PlayerController</code>がアタッチされ、<code>player_idle</code>と<code>player_walk</code>という名前のアニメーションが作成済みであること。</p>
+        <ol>
+            <li><strong>脳を載せる</strong>: IDEモードで<code>player</code>オブジェクトを選択し、「Add Component」から<code>PlayerController</code>をアタッチします。（既にアタッチ済みの場合は不要）</li>
+            <li><strong>神経を繋ぐ（歩行）</strong>:
+                <ol>
+                    <li>プロパティパネルから<strong>「イベント・エディタを開く」</strong>をクリックし、<strong>「+」</strong>ボタンで新しいイベントを作成します。</li>
+                    <li>トリガーを<code>onStateChange</code>、条件を<code>state === 'walk'</code>に設定します。</li>
+                    <li>VSLキャンバスに<code>[anim_play]</code>ノードを追加し、<code>key</code>パラメータに<code>player_walk</code>と入力します。</li>
+                </ol>
+            </li>
+            <li><strong>神経を繋ぐ（待機）</strong>:
+                <ol>
+                    <li>再度<strong>「+」</strong>ボタンでイベントを追加します。</li>
+                    <li>トリガーを<code>onStateChange</code>、条件を<code>state === 'idle'</code>に設定します。</li>
+                    <li>VSLキャンバスに<code>[anim_play]</code>ノードを追加し、<code>key</code>パラメータに<code>player_idle</code>と入力します。</li>
+                </ol>
+            </li>
+             <li><strong>神経を繋ぐ（左向き）</strong>:
+                <ol>
+                    <li><strong>「+」</strong>ボタンでイベントを追加します。</li>
+                    <li>トリガーを<code>onDirectionChange</code>、条件を<code>direction === 'left'</code>に設定します。</li>
+                    <li>VSLキャンバスに<code>[set_flip_x]</code>ノードを追加し、<code>flip</code>パラメータを<code>true</code>（チェックを入れる）に設定します。</li>
+                </ol>
+            </li>
+             <li><strong>神経を繋ぐ（右向き）</strong>:
+                <ol>
+                    <li><strong>「+」</strong>ボタンでイベントを追加します。</li>
+                    <li>トリガーを<code>onDirectionChange</code>、条件を<code>direction === 'right'</code>に設定します。</li>
+                    <li>VSLキャンバスに<code>[set_flip_x]</code>ノードを追加し、<code>flip</code>パラメータを<code>false</code>（チェックを外す）に設定します。</li>
+                </ol>
+            </li>
+            <li><strong>テストする</strong>: プレイモードに切り替え、キーボードの左右キーを押してみてください。キャラクターが操作に合わせてアニメーションし、向きを変えれば成功です。</li>
+        </ol>
+        <p>これで完成です！<br>この仕組みを応用すれば、ジャンプや攻撃など、あらゆるアクションに対応した生き生きとしたキャラクターを、エディタ上の操作だけで作り上げることができます。</p>
+    <hr>
+<h1>アクションタグ・リファレンス</h1>
+<p>イベントに応じて、オブジェクトに様々なアクションを実行させるための命令です。</p>
+
+<hr>
+
+<hr><h2>[run_scenario]</h2>
+<p>現在のゲームシーンを停止させずに、その上から小さなノベルパートを再生します。ボス戦前の会話演出や、操作しながら表示するチュートリアルなど、ゲームプレイとシナリオを融合させるための強力な機能です。</p>
+<p>このタグで呼び出されたノベルパートは、専用の<code>[overlay_end]</code>タグで終了させる必要があります。</p>
+<h4>パラメータ:</h4>
+<ul>
+<li><strong>file</strong> (必須): 再生したいシナリオファイル名（例: <code>"tutorial.ks"</code>）。</li>
+<li><strong>block_input</strong> (任意): <code>false</code>に設定すると、背後のゲームシーンの操作をブロックせず、プレイヤーがキャラクターを動かしながらシナリオを読むことができます。デフォルトは<code>true</code>（操作はブロックされる）。</li>
+</ul>
+<p><strong>注意:</strong> このタグは、呼び出したシナリオが<code>[overlay_end]</code>で終了するまで、元のアクション（イベント）の処理を停止させます。</p>
+<p><strong>使用例:</strong></p>
+<pre><code>; "boss_intro.ks" を読み込み、プレイヤーの操作を止めて会話演出を再生
+[run_scenario file=boss_intro.ks]
+; 次のアクションは、boss_intro.ksが終了するまで実行されない
+[start_battle]
+
+; "tutorial_01.ks" を読み込み、プレイヤーが操作しながら読めるチュートリアルを表示
+[run_scenario file=tutorial_01.ks block_input=false]
+</code></pre>
+
+<hr>
+
+<h3><pre>[overlay_end]</pre></h3>
+<p><strong>機能:</strong> <code>[run_scenario]</code>で開始したオーバーレイシナリオを終了し、元のゲームシーンに戻ります。このタグは、オーバーレイ用のシナリオの最後に必ず記述してください。</p>
+<p><strong>パラメータはありません。</strong></p>
+<pre><code>
+; tutorial_01.ks の中身
+yuna:「画面左のスティックで移動できるよ！」[p]
+yuna:「右下のボタンでジャンプ！ 試してみて！」[p]
+; チュートリアルが終了したので、オーバーレイを閉じる
+[overlay_end]
+</code></pre>
+
+<hr>
+<h2>[showwindow]</h2>
+<p>メッセージウィンドウを指定された位置に表示します。オーバーレイシナリオで、チュートリアルUIのようにウィンドウを画面上部に表示したい場合などに使用します。</p>
+<h4>パラメータ:</h4>
+<ul>
+<li><strong>align</strong> (任意): ウィンドウの垂直位置を大まかに指定します。<code>top</code>, <code>center</code>, <code>bottom</code> のいずれかを指定できます。デフォルトは<code>bottom</code>。</li>
+<li><strong>margin_y</strong> (任意): <code>align</code>で上下に揃えた際の、画面の端からの余白（ピクセル数）を指定します。デフォルトは<code>20</code>。</li>
+<li><strong>x</strong> (任意): ウィンドウのX座標をピクセル単位で直接指定します。この値が指定された場合、<code>align</code>による中央揃えは無視されます。</li>
+<li><strong>y</strong> (任意): ウィンドウのY座標をピクセル単位で直接指定します。この値が指定された場合、<code>align</code>と<code>margin_y</code>は無視されます。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; ウィンドウを画面上部に、端から20pxの余白を空けて表示
+[showwindow align=top]
+; ウィンドウを画面のど真ん中に表示
+[showwindow align=center]
+
+; ウィンドウをX座標300, Y座標100のカスタム位置に表示
+[showwindow x=300 y=100]
+</code></pre>
+
+<hr>
+
+<h3><pre>[hidewindow]</pre></h3>
+<p><strong>機能:</strong> メッセージウィンドウを非表示にします（画面の外へ移動させます）。演出上、一時的にウィンドウを消したい場合に使用します。</p>
+<p><strong>パラメータはありません。</strong></p>
+<pre><code>
+; 一度ウィンドウを隠して、イベントCGに集中させる
+[hidewindow]
+[image storage=event_cg01 time=1000]
+[wait time=2000]
+; 再びウィンドウをデフォルト位置（下部）に表示する
+[showwindow]
+yuna:「……きれい。」[p]
+</code></pre>
+
+<hr>
+
+<h2>[time_stop]</h2>
+<p>ゲーム全体の時間を停止させます。物理演算、Tween、タイマーなど、時間経過に依存する全てのものが停止します。アクションステージの冒頭などに用います。</p>
+<p><strong>注意:</strong> このタグは、<code>onReady</code>トリガーと併用するのが最も安全で効果的です。これにより、シーンの全てのオブジェクトが生成された直後に時間が停止し、予期せぬ挙動を防ぎます。</p>
+<p><strong>パラメータ:</strong> なし</p>
+<p><strong>使用例:</strong></p>
+<pre><code>
+--- イベント (オブジェクト "OpeningEvent" に設定) ---
+Trigger: onReady
+Actions: [time_stop]
+</code></pre>
+丶
+<h2>[time_resume]</h2>
+<p><code>[time_stop]</code>によって停止されたゲーム全体の時間を再開させます。通常、UIボタン（例：「イベント開始」ボタン）が押された際の<code>onClick</code>イベントと連携して使用されます。</p>
+<p><strong>パラメータ:</strong> なし</p>
+<p><strong>使用例:</strong></p>
+<pre><code>
+--- イベント (オブジェクト "StartButton" に設定) ---
+Trigger: onClick
+Actions: [time_resume][destroy target=self]
+</code></pre>
+
+<hr>
+
+<h3><pre>[wait time=...]</pre></h3>
+<p>
+    <strong>機能:</strong> アクションの実行を、指定された時間だけ一時停止します。<br>
+    これにより、演出に「タメ」や「間」を作ることができます。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li>
+        <strong>time (必須):</strong> 待機する時間をミリ秒単位で指定します。(例: <code>1000</code>で1秒)
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; 敵にダメージを与える
+[anim_play target=enemy anim=damage]
+; 0.5秒待ってから、ヒットエフェクトを出す
+[wait time=500]
+[spawn_object prefab=hit_effect at=target]
+</code>
+</pre>
+
+<hr>
+
+<h2>[transition_scene]</h2>
+<p>
+    現在のゲームシーンを終了し、指定された新しいゲームシーンを開始します。
+    ステージ間の移動、ワールドマップからダンジョンへの進入など、ゲームエリアの遷移全般を管理する、極めて重要なタグです。
+</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>scene</strong> (必須): 遷移先のシーンのキー（例: <code>JumpScene</code>, <code>WorldMapScene</code>）。</li>
+    <li><strong>data</strong> (任意): 遷移先のシーンが読み込むべき、レイアウトJSONデータのキーを指定します。これにより、同じ<code>JumpScene</code>を使いながら、異なるステージ（例: <code>cave_stage</code>, <code>castle_stage</code>）を読み込ませることができます。</li>
+    <li><strong>script</strong> (任意): 遷移先がノベルシーンの場合に、開始するシナリオファイル名を指定します。</li>
+    <li><strong>fade_time</strong> (任意): 画面が暗転するフェードアウト・フェードインの時間（ミリ秒）。デフォルトは<code>500</code>。</li>
+    <li><strong>fade_color</strong> (任意): フェードの色を16進数で指定。デフォルトは<code>0x000000</code>（黒）。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; 同じJumpSceneを使い、"stage_2"のデータで再起動する
+[transition_scene scene=JumpScene data=stage_2]
+
+; WorldMapSceneから、"ShopScene"に遷移する
+[transition_scene scene=ShopScene data=shop_interior script=shop_keeper_talk]
+
+; 赤い画面で、1秒かけてフェードしながらボス戦シーンに突入
+[transition_scene scene=BossScene data=boss_room fade_color=0xff0000 fade_time=1000]
+</code></pre>
+
+<hr>
+
+<h3>onOverlap_Start / onOverlap_End</h3>
+<p>
+    物理的に反発しない「センサー」ボディ同士が、重なり合った瞬間 (<code>onOverlap_Start</code>) と、重なりが解消された瞬間 (<code>onOverlap_End</code>) に発火します。
+    当たり判定は欲しいが、通り抜けさせたいオブジェクト（アイテム、ワープゾーン、イベントエリアなど）に最適です。
+</p>
+<p>このトリガーを機能させるには、対象オブジェクトの物理プロパティで<strong>「センサー」</strong>チェックボックスを<code>true</code>に設定する必要があります。</p>
+
+<h4>必須パラメータ:</h4>
+<ul>
+    <li>
+        <strong><code>targetGroup</code></strong>: 反応する相手のグループ名。
+        <br>例: <code>player</code>, <code>enemy_bullet</code>
+    </li>
+</ul>
+
+<p><strong>使用例 (アイテム取得):</strong></p>
+<pre><code>
+--- イベント (コインオブジェクトに設定) ---
+Trigger: onOverlap_Start
+Target Group: player
+Actions: [play_sound key=coin_get][destroy target=self]
+</code></pre>
+
+<hr>
+
+<h3>onInteract</h3>
+<p>
+    プレイヤーが近くにいて、「調べる」キー（デフォルトは上矢印キー）を押した瞬間に発火します。扉を開ける、NPCに話しかける、宝箱を開けるといった「近接インタラクション」を実装するための専用トリガーです。
+</p>
+<p>このトリガーが機能するには、以下の3つの要素が正しく設定されている必要があります。</p>
+<ol>
+    <li>プレイヤーオブジェクトに<code>Interactor</code>コンポーネントがアタッチされていること。</li>
+    <li>
+        このオブジェクト（扉など）が、プレイヤーとの<code>onOverlap_Start</code>で<code>[interact_add]</code>タグを実行していること。
+    </li>
+    <li>
+        このオブジェクトが、プレイヤーとの<code>onOverlap_End</code>で<code>[interact_remove]</code>タグを実行していること。
+    </li>
+</ol>
+<p><strong>パラメータ:</strong> なし</p>
+
+<!-- ====================================================== -->
+<!-- 次に、アクションタグ・リファレンスのセクションに追加 -->
+<!-- ====================================================== -->
+
+<hr>
+
+<h2>[interact_add]</h2>
+<p>
+    このタグを持つオブジェクト（扉、NPCなど）を、プレイヤーの「インタラクト可能リスト」に追加します。
+    通常、プレイヤーとの<code>onOverlap_Start</code>イベントと組み合わせて使用します。これにより、プレイヤーがオブジェクトの近くにいる間だけ、「調べる」ことが可能になります。
+</p>
+<p><strong>パラメータ:</strong></p>
+<ul>
+    <li><strong>target</strong> (任意): <code>self</code>を指定するのが一般的です。これにより、このタグが設定されたオブジェクト自身がリストに追加されます。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>
+--- イベント (扉オブジェクトに設定) ---
+Trigger: onOverlap_Start
+Target Group: player
+Actions: [interact_add target=self][set_visible target=interact_mark value=true]
+</code></pre>
+
+<hr>
+
+<h2>[interact_remove]</h2>
+<p>
+    このタグを持つオブジェクトを、プレイヤーの「インタラクト可能リスト」から削除します。
+    通常、プレイヤーとの<code>onOverlap_End</code>イベントと組み合わせて使用します。これにより、プレイヤーがオブジェクトから離れると、「調べる」ことができなくなります。
+</p>
+<p><strong>パラメータ:</strong></p>
+<ul>
+    <li><strong>target</strong> (任意): <code>self</code>を指定するのが一般的です。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>
+--- イベント (扉オブジェクトに設定) ---
+Trigger: onOverlap_End
+Target Group: player
+Actions: [interact_remove target=self][set_visible target=interact_mark value=false]
+</code></pre>
+
+<hr>
+<h3><pre>[spawn_object prefab=... at=... props=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 指定したプレハブから、新しいオブジェクトをシーンに生成（スポーン）します。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li><strong>prefab (必須):</strong> スポーンするプレハブのアセットキー。</li>
+    <li>
+        <strong>at:</strong> スポーンする位置。以下のいずれかを指定できます。(デフォルト: <code>self</code>)
+        <ul>
+            <li><code>self</code>: このアクションを実行しているオブジェクトの位置。</li>
+            <li><code>other</code>: 衝突イベントの相手など、イベントのターゲットとなったオブジェクトの位置。</li>
+            <li><code>pointer</code>: 現在のマウスカーソルまたはタッチ位置。</li>
+            <li><code>center</code>: カメラが表示している画面の中央。</li>
+            <li><code>"x,y"</code>: ワールド座標を直接指定 (例: <code>"400,300"</code>)。</li>
+            <li><em>オブジェクト名</em>: シーンに存在する特定のオブジェクトの名前。</li>
+        </ul>
+    </li>
+    <li>
+        <strong>props:</strong> プレハブのプロパティを上書きするためのJSON形式の文字列。
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; プレイヤーがクリックした場所に、爆発エフェクトを出す
+[spawn_object prefab=explosion_effect at=pointer]
+
+; 画面中央に、ボスキャラを登場させる
+[spawn_object prefab=boss_character at=center]
+
+; ステージの決まった位置(1200, 500)に隠しアイテムを出現させる
+[spawn_object prefab=secret_sword at="1200,500"]
+</code>
+</pre>
+<hr>
+<hr>
+
+<h2>[set_flip_x]</h2>
+<p>対象オブジェクトを左右に反転させます。キャラクターが左右を向くアニメーションの代わりとして、あるいはそれと組み合わせて使用します。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>value</strong> (必須): <code>true</code>で左右反転（左向き）、<code>false</code>で通常表示（右向き）にします。</li>
+</ul>
+<p><strong>使用例 (onDirectionChangeと連携):</strong></p>
+<pre><code>
+--- イベント1: 左を向いた時 ---
+Trigger: onDirectionChange
+Condition: direction === 'left'
+Actions: [set_flip_x value=true]
+
+--- イベント2: 右を向いた時 ---
+Trigger: onDirectionChange
+Condition: direction === 'right'
+Actions: [set_flip_x value=false]
+</code></pre>
+
+<hr>
+
+<h2>[anim_stop]</h2>
+<p>対象オブジェクトで現在再生中のスプライトアニメーションを停止し、その時点のフレームで静止させます。</p>
+<p><strong>パラメータ:</strong> なし</p>
+<p><strong>使用例:</strong></p>
+<pre><code>
+--- イベント: 歩行が中断された時 ---
+Trigger: onStateChange
+Condition: oldState === 'walk'
+Actions: [anim_stop]
+</code></pre>
+
+<hr>
+
+<h2>[anim_frame]</h2>
+<p>対象オブジェクトを、特定のアニメーションの、特定のフレームで静止させます。アニメーションを再生することなく、キャラクターの「立ち絵」として特定のポーズを表示させたい場合に非常に便利です。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>name</strong> (必須): 参照したいアニメーションの名前（キー）を指定します。</li>
+    <li><strong>frame</strong> (必須): 表示したいフレームの番号（0から始まる）。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>
+; "walk"アニメーションの最初のフレーム(立ちポーズ)で静止させる
+[anim_frame name=walk frame=0]
+
+; "attack"アニメーションの3番目のフレーム(剣を振りかぶったポーズ)で静止させる
+[anim_frame name=attack frame=2]
+</code></pre>
+
+<h2>[destroy]</h2>
+<p>オブジェクトを破壊（シーンから削除）します。</p>
+<ul>
+    <li><strong>target</strong> (オプション): 破壊する対象を指定します。
+        <ul>
+            <li><code>self</code> (デフォルト): このイベントを持つオブジェクト自身。</li>
+            <li><code>other</code>: このイベントを引き起こした衝突相手。</li>
+            <li><code>オブジェクト名</code>: シーン上の特定の名前を持つオブジェクト。</li>
+        </ul>
+    </li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>[destroy]
+[destroy target=self]
+[destroy target=other]
+[destroy target=secret_door]
+</code></pre>
+
+<hr>
+
+<h2>[eval]</h2>
+<p>ゲーム変数 (f.) やシステム変数 (sf.) を操作するJavaScript式を実行します。</p>
+<ul>
+    <li><strong>exp</strong> (必須): 実行する式を、必ずダブルクォーテーションで囲んで記述します。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>[eval exp="f.score = f.score + 10"]
+[eval exp="f.has_key = true"]</code></pre>
+
+<hr>
+
+<h2>[tween]</h2>
+<p>
+    オブジェクトのプロパティを、滑らかに変化させるアニメーション（トゥイーン）を再生します。
+    オブジェクトの移動、フェードイン/アウト、拡大縮小、回転など、あらゆる演出の基本となります。
+    このタグは、無限ループでない限り、アニメーションが完了するまで次のアクションの実行を待ちます。
+</p>
+
+<h4>パラメータ:</h4>
+<ul>
+    <li>
+        <strong>target</strong> (任意): アクションの対象を指定します。デフォルトは<code>self</code>。
+    </li>
+    <li>
+        <strong>property</strong> (必須): 変化させたいプロパティ名。
+        <br>例: <code>x</code>, <code>y</code>, <code>scale</code>, <code>scaleX</code>, <code>scaleY</code>, <code>angle</code>, <code>alpha</code>
+    </li>
+    <li>
+        <strong>to</strong> (必須): 目標となる値。<code>"+=100"</code>や<code>"-=50"</code>といった、現在の値からの相対値も指定可能です。
+    </li>
+    <li>
+        <strong>time</strong> (任意): アニメーション時間（ミリ秒）。デフォルトは<code>1000</code> (1秒)。
+    </li>
+    <li>
+        <strong>ease</strong> (任意): 動きの緩急。デフォルトは<code>Linear</code> (等速)。
+        <br>例: <code>Sine.easeInOut</code>, <code>Bounce.easeOut</code>, <code>Elastic.easeOut</code>
+    </li>
+    <li>
+        <strong>loop</strong> (任意): アニメーションを繰り返す回数を指定します。<code>-1</code>を指定すると<strong>無限ループ</strong>になります。無限ループの場合、このタグは待機せずに即座に次のアクションへ進みます。
+    </li>
+    <li>
+        <strong>yoyo</strong> (任意): <code>true</code>にすると、アニメーションが終点に達した後、始点まで逆再生します。<code>loop</code>と組み合わせることで、点滅や浮遊のような表現が可能になります。
+    </li>
+</ul>
+
+<p><strong>基本的な使用例:</strong></p>
+<pre><code>; 1秒かけて右に200ピクセル移動
+[tween property=x to="+=200" time=1000]
+
+; 0.5秒かけて、跳ねながらY座標500の位置に着地
+[tween property=y to=500 time=500 ease=Bounce.easeOut]
+
+; 0.3秒かけて1.5倍に拡大する
+[tween property=scale to=1.5 time=300]
+</code></pre>
+
+<p><strong>無限ループの使用例 (テキストやUI向け):</strong></p>
+<pre><code>
+; 「Tap to Start」テキストをゆっくりと点滅させ続ける
+[tween target=start_text property=alpha to=0.2 time=1500 ease=Sine.easeInOut yoyo=true loop=-1]
+
+; 「！」マークを上下にフワフワと動かし続ける
+[tween target=interact_mark property=y to="+=10" time=1000 ease=Sine.easeInOut yoyo=true loop=-1]
+</code></pre>
+
+<hr>
+
+<h2>[apply_force]</h2>
+<p>対象オブジェクトに物理的な「力」を加えます。オブジェクトは慣性や摩擦に従って加速します。ノックバックや、ジャンプの補助などに最適です。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>x</strong> (任意): X方向に加える力の大きさ。正の値で右、負の値で左。</li>
+    <li><strong>y</strong> (任意): Y方向に加える力の大きさ。正の値で下、負の値で上。</li>
+</ul>
+<p><strong>注意:</strong> このタグは、<code>[body_velocity]</code>と異なり、現在の速度に力を「加算」します。値を大きくしすぎると、オブジェクトがすごい勢いで飛んでいく可能性があります。</p>
+<p><strong>使用例:</strong></p>
+<pre><code>; 敵に踏まれた時、上に少しだけ跳ね返る
+[apply_force y=-0.05]
+
+; 爆風で右に吹き飛ばされる
+[apply_force x=0.2]
+</code></pre>
+
+<hr>
+
+<h2>[body_velocity]</h2>
+<p>対象オブジェクトの物理ボディの速度 (Velocity) を直接設定します。物理的な挙動を強制的に変更したい場合に使います。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>x</strong> (任意): X方向の速度を設定します。</li>
+    <li><strong>y</strong> (任意): Y方向の速度を設定します。</li>
+</ul>
+<p><strong>注意:</strong> XとY、どちらか一方だけの指定も可能です。指定されなかった方向の速度は、現在の値を維持します。</p>
+<p><strong>使用例:</strong></p>
+<pre><code>; 右方向に速さ5で押し出す
+[body_velocity x=5]
+
+; 上方向に強く打ち上げる
+[body_velocity y=-15]
+
+; 右斜め上にジャンプさせる
+[body_velocity x=7 y=-12]
+</code></pre>
+
+<hr>
+
+<h2>[anim_play]</h2>
+<p>対象オブジェクトのスプライトアニメーションを再生します。対象はスプライトである必要があります。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>name</strong> (必須): 再生したいアニメーションの名前（キー）を指定します。アニメーションは、あらかじめシーンのJSONで定義されている必要があります。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; "walk" という名前のアニメーションを再生
+[anim_play name=walk]
+
+; "jump_attack" という名前のアニメーションを再生
+[anim_play name=jump_attack]
+</code></pre>
+
+<hr>
+
+<h2>[set_visible]</h2>
+<p>対象オブジェクトの表示・非表示を切り替えます。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>value</strong> (必須): <code>true</code>で表示、<code>false</code>で非表示にします。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; オブジェクトを非表示にする
+[set_visible value=false]
+
+; オブジェクトを再表示する
+[set_visible value=true]
+</code></pre>
+<hr>
+
+<h2>[play_sound]</h2>
+<p>効果音（SFX）を再生します。あらかじめ<code>asset_define.json</code>でオーディオアセットとして読み込んでおく必要があります。</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>key</strong> (必須): 再生したい効果音のアセットキー。</li>
+    <li><strong>volume</strong> (任意): 音量。<code>0.0</code>（無音）から<code>1.0</code>（最大音量）の範囲で指定します。デフォルトは<code>1.0</code>。</li>
+    <li><strong>loop</strong> (任意): <code>true</code>にすると、効果音がループ再生されます。<code>[stop_sound]</code>タグ（未実装）で停止させるまで鳴り続けます。デフォルトは<code>false</code>。</li>
+</ul>
+<p><strong>注意:</strong> このタグは音の再生を「開始」するだけで、再生が完了するのを待ちません。すぐに次のアクションの処理に移ります。</p>
+<p><strong>使用例:</strong></p>
+<pre><code>; "jump_sfx" というキーの効果音を再生
+[play_sound key=jump_sfx]
+
+; 敵を倒した時の音を、少し小さめの音量で再生
+[play_sound key=enemy_defeat_sfx volume=0.7]
+
+; アイテム取得音がループ再生される (特殊な演出)
+[play_sound key=item_get_loop loop=true]
+</code></pre>
+<h3><pre>[stop_sound key=...]</pre></h3>
+<p><strong>機能:</strong> <code>[play_sound]</code>でループ再生した効果音を停止します。</p>
+<ul>
+    <li><strong>key (必須):</strong> 停止したい効果音のアセットキー。</li>
+</ul>
+<pre><code>
+; 警告音を鳴らし始める
+[play_sound key=alarm_sound loop=true]
+; ...何らかの処理...
+; 警告音を止める
+[stop_sound key=alarm_sound]
+</code></pre>
+<hr>
+
+<!-- ====================================================== -->
+<h2>カスタムイベントトリガー (エディタ)</h2>
+<p>PlayerControllerのような特定のコンポーネントが、自身の状態変化を知らせるために発行する、独自のイベントです。これにより、オブジェクトの内部状態とアニメーションやサウンドを、エディタだけで簡単に関連付けることができます。</p>
+<!-- ====================================================== -->
+
+<h3>onStateChange</h3>
+<p><code>PlayerController</code>コンポーネントが、自身の状態（<code>idle</code>, <code>walk</code>, <code>jump_up</code>, <code>fall_down</code>）を変更した瞬間に一度だけ発火します。</p>
+<h4>利用可能な変数 (Condition欄):</h4>
+<ul>
+    <li>
+        <strong><code>state</code></strong>: 遷移先の<strong>新しい</strong>状態名（文字列）。
+        <br>例: <code>'idle'</code>, <code>'walk'</code>, <code>'jump_up'</code>, <code>'fall_down'</code>
+    </li>
+    <li>
+        <strong><code>oldState</code></strong>: 遷移元の<strong>古い</strong>状態名（文字列）。
+    </li>
+</ul>
+
+<p><strong>使用例 (アニメーション連携):</strong></p>
+<pre><code>
+--- イベント1: 歩き始め ---
+Trigger: onStateChange
+Condition: state === 'walk'
+Actions: [anim_play name=walk_animation]
+
+--- イベント2: 停止 ---
+Trigger: onStateChange
+Condition: state === 'idle'
+Actions: [anim_frame name=walk_animation frame=0]
+
+--- イベント3: 歩行終了時 ---
+Trigger: onStateChange
+Condition: oldState === 'walk'
+Actions: [anim_stop]
+</code></pre>
+
+<hr>
+
+<h3>onDirectionChange</h3>
+<p><code>PlayerController</code>コンポーネントが、キャラクターの向き（<code>left</code>, <code>right</code>）を変更した瞬間に一度だけ発火します。</p>
+<h4>利用可能な変数 (Condition欄):</h4>
+<ul>
+    <li>
+        <strong><code>direction</code></strong>: 新しい向き（文字列）。
+        <br>例: <code>'left'</code>, <code>'right'</code>
+    </li>
+</ul>
+
+<p><strong>使用例 (左右反転):</strong></p>
+<pre><code>
+--- イベント1: 左を向いた時 ---
+Trigger: onDirectionChange
+Condition: direction === 'left'
+Actions: [set_flip_x value=true]
+
+--- イベント2: 右を向いた時 ---
+Trigger: onDirectionChange
+Condition: direction === 'right'
+Actions: [set_flip_x value=false]
+</code></pre>
+
+<hr>
+
+<h3><pre>[camera_shake power=... time=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 画面（メインカメラ）を揺らします。<br>
+    攻撃のヒット時や、爆発、地震などの演出に最適です。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li>
+        <strong>time:</strong> 揺れが続く時間をミリ秒単位で指定します。 (デフォルト: <code>500</code>)
+    </li>
+    <li>
+        <strong>power:</strong> 揺れの強さを指定します。<code>0.01</code>(弱い)〜<code>0.1</code>(激しい)程度の値が推奨されます。 (デフォルト: <code>0.01</code>)
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; プレイヤーが地面に激突
+[apply_force target=player y=10]
+; 強い揺れを0.3秒間発生させる
+[camera_shake power=0.05 time=300]
+</code>
+</pre>
+
+<hr>
+
+<h3><pre>[camera_fade type=... time=... color=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 画面を指定した色で覆ったり、元に戻したりします（フェードイン/アウト）。
+</p>
+<ul>
+    <li><strong>type (必須):</strong> <code>in</code> (フェードイン) または <code>out</code> (フェードアウト) を指定します。</li>
+    <li><strong>time:</strong> フェードにかける時間をミリ秒で指定します。(デフォルト: <code>1000</code>)</li>
+    <li><strong>color:</strong> フェードに使う色を16進数で指定します。(デフォルト: <code>0x000000</code> 黒)</li>
+</ul>
+<pre><code>
+; 画面をゆっくりと黒に
+[camera_fade type=out time=2000]
+[wait time=2000]
+; 黒からゆっくりと元の画面に
+[camera_fade type=in time=2000]
+</code></pre>
+
+<hr>
+<h3><pre>[camera_follow target=...]</pre></h3>
+<p>
+    <strong>機能:</strong> カメラが追いかける対象のオブジェクトを設定します。
+</p>
+<ul>
+    <li><strong>target (必須):</strong> 追従させたいオブジェクトの<strong>名前</strong>を指定します。<code>none</code>を指定すると追従を解除します。</li>
+</ul>
+<pre><code>
+; イベント開始！ボスに注目！
+[camera_follow target=boss_enemy]
+[wait time=3000]
+; 再びプレイヤーを追いかける
+[camera_follow target=player]
+</code></pre>
+<hr>
+<!-- manual_play_bgm.html -->
+<h3><pre>[play_bgm key=... loop=...]</pre></h3>
+<p><strong>機能:</strong> BGMを再生します。既に別のBGMが再生中の場合は、自動でクロスフェードします。</p>
+<ul>
+    <li><strong>key (必須):</strong> 再生するBGMのアセットキー。</li>
+    <li><strong>loop:</strong> <code>true</code> (デフォルト) または <code>false</code> を指定。</li>
+</ul></code></pre>
+
+<hr>
+<!-- manual_stop_bgm.html -->
+<h3><pre>[stop_bgm time=...]</pre></h3>
+<p><strong>機能:</strong> 現在再生中のBGMを停止します。</p>
+<ul>
+    <li><strong>time:</strong> フェードアウトにかける時間をミリ秒で指定します。(デフォルト: <code>0</code> 即時停止)</li>
+</ul>
+<hr>
+<h3><pre>[set_collision target=... category=... mask=...]</pre></h3>
+<p>
+    <strong>機能:</strong> オブジェクトの物理的な衝突ルールを、<strong>名前</strong>で動的に変更します。
+</p>
+<p>
+    カテゴリ名やマスク名は、<code>physics_define.json</code>で定義したものを使用します。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li><strong>target (必須):</strong> 対象オブジェクトの名前。</li>
+    <li><strong>category:</strong> このオブジェクトが所属するカテゴリ名を指定します。(例: <code>player</code>)</li>
+    <li><strong>mask:</strong> このオブジェクトが衝突する相手のカテゴリ名を、<strong>カンマ区切り</strong>で指定します。(例: <code>"enemy, wall"</code>)</li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; プレイヤーを3秒間、アイテムだけを拾えるゴースト状態にする
+[set_collision target=player mask="item"]
+[wait time=3000]
+; 元のルール（敵と壁に当たる）に戻す
+[set_collision target=player mask="enemy, wall"]
+</code>
+</pre>
+<hr>
+<h3><pre>[spawn_object prefab=... at=... props=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 指定したプレハブから、新しいオブジェクトをシーンに生成（スポーン）します。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li><strong>prefab (必須):</strong> スポーンするプレハブのアセットキー。</li>
+    <li><strong>at:</strong> スポーンする位置。<code>self</code> (自分自身), <code>other</code> (衝突相手など), <code>pointer</code> (マウス/タッチ位置), またはオブジェクトの名前を指定できます。(デフォルト: <code>self</code>)</li>
+    <li>
+        <strong>props (【強化】):</strong> プレハブのプロパティを上書きするための<strong>JSON形式の文字列</strong>。ネストしたプロパティ（物理ボディの速度など）も変更できます。
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; プレイヤーの位置に、デフォルトの弾をスポーン
+[spawn_object prefab=bullet at=player]
+
+; プレイヤーの位置に、上書きした「高速な赤い弾」をスポーン
+[spawn_object prefab=bullet at=player props='{
+    "tint": "0xff0000",
+    "physics": {
+        "velocity": { "y": -800 }
+    }
+}']
+</code>
+</pre>
+<hr>
+<h3><pre>[set_data name=... value=...]</pre></h3>
+<p>
+    <strong>機能:</strong> <code>[eval]</code>タグの安全な代替として、ゲーム変数(<code>f.</code>)の値を設定します。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li><strong>name (必須):</strong> 設定するゲーム変数の名前。(<code>f.</code>は不要)</li>
+    <li><strong>value (必須):</strong> 設定する値。
+        <ul>
+            <li><code>"true"</code>, <code>"false"</code> は自動的に真偽値になります。</li>
+            <li><code>"123"</code>, <code>"5.5"</code> は自動的に数値になります。</li>
+            <li><code>"f.score + 100"</code> のように、既存のゲーム変数を使った計算式も指定できます。</li>
+            <li>上記以外は、文字列として扱われます。</li>
+        </ul>
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; イベントフラグを立てる
+[set_data name=talked_to_npc value=true]
+
+; スコアを100点加算する
+[set_data name=score value="f.score + 100"]
+
+; プレイヤーのHPを10減らす
+[set_data name=player_hp value="f.player_hp - 10"]
+
+; アイテム名をセットする
+[set_data name=last_item value="薬草"]
+</code>
+</pre>
+<hr>
+<!-- manual_return_novel.html -->
+<h3><pre>[return_novel params=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 現在実行中のゲームシーンを終了し、中断していたノベルパートに復帰します。<br>
+    ゲームシーン中で変更された変数(<code>f.</code>)は、すべて自動的に引き継がれます。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li>
+        <strong>params (任意):</strong> 復帰後のノベルパートに渡したい追加の変数を、<strong>JSON形式の文字列</strong>で指定できます。渡された変数は、復帰後のシナリオで一時変数(<code>tf.</code>)として参照できます。(例: <code>tf.cleared_stage = 'stage1'</code>)
+    </li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; ボスを倒した後のイベント
+[set_data name=boss_defeated value=true]
+; どのステージをクリアしたかの情報を付けて、物語に戻る
+[return_novel params='{ "cleared_stage": "stage1" }']
+</code>
+</pre>
+<p>
+    復帰後の<code>GameScene</code>のシナリオ側:
+</p>
+<pre>
+<code>
+*on_resume_from_jump_scene
+[if exp="tf.cleared_stage === 'stage1'"]
+  yuna:「ステージ1をクリアしたのね！おめでとう！」
+[endif]
+</code>
+</pre>
+<hr>
+<h3><pre>[set_ui_visible group=... visible=...]</pre></h3>
+<p>
+    <strong>機能:</strong> 指定されたグループに属するUI要素（HUDなど）の表示/非表示を、まとめて切り替えます。
+</p>
+<p>
+    グループ名は、<code>uiRegistry</code>で定義された<code>groups</code>配列に基づきます。
+</p>
+<p>
+    <strong>パラメータ:</strong>
+</p>
+<ul>
+    <li><strong>group (必須):</strong> 対象となるUIグループ名。(例: <code>hud</code>, <code>controls</code>)</li>
+    <li><strong>visible (必須):</strong> <code>true</code>（表示）または <code>false</code>（非表示）を指定します。</li>
+</ul>
+<p>
+    <strong>使用例:</strong>
+</p>
+<pre>
+<code>
+; ボス登場演出の開始
+[set_ui_visible group=hud visible=false]
+[camera_shake power=0.05 time=2000]
+[spawn_object prefab=boss at=center]
+[wait time=1000]
+; 戦闘開始と共にHUDを再表示
+[set_ui_visible group=hud visible=true]
+</code>
+</pre>
+<hr>
+<hr>
+
+<h2>[if], [else], [endif] - 条件分岐</h2>
+<p>
+    ゲームの変数 (<code>f.</code>) の値に応じて、実行するロジックの流れを分岐させるための、最も強力なフロー制御タグ群です。
+    これらは必ずセットで使います。
+</p>
+<p>
+    VSLエディタ上では、<code>[if]</code>ノードから「True」と「False」の2つの線が分岐します。
+</p>
+
+<h4>[if]</h4>
+<p>分岐の開始点です。条件式を評価し、結果が真(true)か偽(false)かを決定します。</p>
+<ul>
+    <li><strong>exp</strong> (必須): 評価する条件式を、JavaScriptの構文で記述します。
+        <ul>
+            <li>例: <code>f.player_hp <= 0</code> (プレイヤーのHPが0以下なら)</li>
+            <li>例: <code>f.found_key === true</code> (鍵を見つけているフラグがtrueなら)</li>
+            <li>例: <code>f.score >= 100 && f.level === 5</code> (スコアが100以上、かつ、レベルが5なら)</li>
+        </ul>
+    </li>
+</ul>
+
+<h4>[else]</h4>
+<p>
+    省略可能な中間点です。<code>[if]</code>の条件式が偽(false)だった場合に、こちらのルートの処理が実行されます。
+    このタグ自体にパラメータはありません。
+</p>
+
+<h4>[endif]</h4>
+<p>
+    分岐の合流点です。<code>[if]</code>のTrueルートの最後と、<code>[else]</code>ルートの最後（または<code>[if]</code>のFalseルートの最後）からこのノードに接続することで、分岐した処理が再び一つの流れに戻ります。
+    このタグ自体にパラメータはありません。
+</p>
+
+<p><strong>VSLでの接続例:</strong></p>
+<ol>
+    <li>
+        <strong>シンプルなIf文 (Elseなし):</strong><br>
+        <code>[if exp="..."]</code> の <strong>Trueピン</strong>から次のアクション（例: <code>[spawn_object]</code>）に繋ぎ、そのアクションから <code>[endif]</code> に繋ぎます。<br>
+        <code>[if exp="..."]</code> の <strong>Falseピン</strong>は、直接 <code>[endif]</code> に繋ぎます。<br>
+        → これにより、条件が偽だった場合はアクションがスキップされます。
+    </li>
+    <li>
+        <strong>If-Else文:</strong><br>
+        <code>[if exp="..."]</code> の <strong>Trueピン</strong>からTrue用のアクション（例: <code>[play_sound key="success"]</code>）に繋ぎ、そのアクションから <code>[endif]</code> に繋ぎます。<br>
+        <code>[if exp="..."]</code> の <strong>Falseピン</strong>から <code>[else]</code> に繋ぎ、<code>[else]</code> からFalse用のアクション（例: <code>[play_sound key="failure"]</code>）に繋ぎ、そのアクションから <code>[endif]</code> に繋ぎます。<br>
+        → これにより、条件に応じてどちらか片方のアクションだけが実行されます。
+    </li>
+</ol>
+
+<p><strong>使用例:</strong></p>
+<pre><code>; プレイヤーのHPが0以下ならゲームオーバーシーンに遷移し、そうでなければHPを10回復する
+[if exp="f.player_hp <= 0"]
+    [transition_scene scene=GameOverScene]
+[else]
+    [set_data name=player_hp value="f.player_hp + 10"]
+    [play_sound key=heal]
+[endif]
+</code></pre>
+
+<hr>
+<hr>
+
+<h2>[distance_check]</h2>
+<p>
+    2つのオブジェクト間の距離をリアルタイムで測定し、指定した距離よりも「近い」か「遠い」かに応じて、VSLの処理フローを分岐させます。
+    敵AIがプレイヤーを発見したり、見失ったりするロジックの根幹をなす、ステートマシンで最も重要なタグの一つです。
+</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>target_a</strong> (任意): 距離測定の起点となるオブジェクトの名前。デフォルトは<code>source</code>（このVSLを実行しているオブジェクト自身）。</li>
+    <li><strong>target_b</strong> (任意): 距離測定の目標となるオブジェクトの名前。デフォルトは<code>player</code>。</li>
+    <li><strong>distance</strong> (必須): 比較の基準となる距離をピクセル単位で指定します。</li>
+</ul>
+<h4>出力ピン:</h4>
+<ul>
+    <li><strong>output_near</strong>: 2オブジェクト間の距離が、<code>distance</code>パラメータの値「以下」の場合に、こちらに接続されたノードが実行されます。</li>
+    <li><strong>output_far</strong>: 距離が<code>distance</code>パラメータの値より「大きい」場合に、こちらに接続されたノードが実行されます。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; プレイヤーとの距離が300px以下になったら、状態を「追跡」に切り替える
+[distance_check target_b="player" distance="300"]
+; output_nearピンから次のノードへ接続
+; output_farピンからはどこにも接続しない（何もしない）
+</code></pre>
+
+<hr>
+
+<h2>[move_to_target]</h2>
+<p>
+    このVSLを実行しているオブジェクト（source）を、指定したターゲットオブジェクトに向かって、一定の速度で移動させます。
+    このタグを機能させるには、対象オブジェクトに物理ボディが付与されている必要があります。主に<code>onUpdate</code>フック内で継続的に実行することで、追跡行動などを実現します。
+</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>target</strong> (任意): 移動の目標となるオブジェクトの名前。デフォルトは<code>player</code>。</li>
+    <li><strong>speed</strong> (任意): 移動速度。数値を大きくするほど速く移動します。デフォルトは<code>2</code>。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; プレイヤーに向かって、速度3.5で移動し続ける
+[move_to_target target="player" speed="3.5"]
+</code></pre>
+
+<hr>
+
+<h2>[timer_check]</h2>
+<p>
+    指定した時間が経過したかどうかを判定し、処理フローを分岐させます。
+    このノードが初めて実行された瞬間に、内部タイマーを開始します。以降、指定時間が経過するまでは「実行中」ピンを、時間が経過した瞬間に「完了」ピンを実行し、タイマーをリセットします。
+    攻撃のクールダウン、一定時間の待機行動などに使用します。
+</p>
+<h4>パラメータ:</h4>
+<ul>
+    <li><strong>duration</strong> (必須): 待機する時間をミリ秒単位で指定します（1000 = 1秒）。</li>
+    <li><strong>id</strong> (任意): 1つのオブジェクトで複数のタイマーを同時に管理したい場合に使用する、一意の識別子。デフォルトは<code>default</code>。</li>
+</ul>
+<h4>出力ピン:</h4>
+<ul>
+    <li><strong>output_running</strong>: タイマーがまだ実行中の場合に、こちらに接続されたノードが実行されます。</li>
+    <li><strong>output_finished</strong>: 指定時間が経過した瞬間に、こちらに接続されたノードが実行されます。</li>
+</ul>
+<p><strong>使用例:</strong></p>
+<pre><code>; 3秒間待機してから、状態を「待機」に戻す
+[timer_check duration="3000"]
+; output_finishedピンから[state_transition to="待機"]ノードへ接続
+</code></pre>
+
+<hr>

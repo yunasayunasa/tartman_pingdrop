@@ -1,0 +1,172 @@
+{
+  "scene_settings": {},
+  "hasJoystick": false,
+  "layers": [
+    {
+      "name": "Foreground",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Gameplay",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Background",
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "objects": [
+    {
+      "name": "jump_button",
+      "type": "JumpButton",
+      "x": 1100,
+      "y": 540,
+      "depth": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "group": [
+        "controls",
+        "action"
+      ],
+      "registryKey": "jump_button",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "message_window",
+      "type": "MessageWindow",
+      "x": 646,
+      "y": 577,
+      "depth": 9998,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "group": "game",
+      "registryKey": "message_window",
+      "label": "",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "menu_button",
+      "type": "Text",
+      "x": 117,
+      "y": 46,
+      "depth": 10,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "registryKey": "menu_button",
+      "text": "MENU",
+      "style": {
+        "fontFamily": "Courier",
+        "fontSize": "36px",
+        "fontStyle": "",
+        "backgroundColor": null,
+        "color": "#fff",
+        "stroke": "#fff",
+        "strokeThickness": 0,
+        "shadowOffsetX": 0,
+        "shadowOffsetY": 0,
+        "shadowColor": "#000",
+        "shadowBlur": 0,
+        "shadowStroke": false,
+        "shadowFill": false,
+        "align": "left",
+        "maxLines": 0,
+        "fixedWidth": 0,
+        "fixedHeight": 0,
+        "resolution": 1,
+        "rtl": false,
+        "testString": "|MÃ‰qgy",
+        "baselineX": 1.2,
+        "baselineY": 1.4,
+        "wordWrapWidth": null,
+        "wordWrapCallback": null,
+        "wordWrapCallbackScope": null,
+        "wordWrapUseAdvanced": false,
+        "metrics": {
+          "ascent": 28.09375,
+          "descent": 8.859375,
+          "fontSize": 36.953125
+        }
+      },
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "bottom_panel",
+      "type": "BottomPanel",
+      "x": 0,
+      "y": 800,
+      "depth": 9999,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "registryKey": "bottom_panel",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "interact_button_1759238969243",
+      "type": "InteractButton",
+      "x": 1009,
+      "y": 652,
+      "depth": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "registryKey": "interact_button",
+      "label": "調べる",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "debug_menu_button",
+      "type": "Button",
+      "x": 1200,
+      "y": 50,
+      "depth": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "events": [
+        {
+          "trigger": "onClick",
+          "id": "event_open_pause_menu",
+          "nodes": [
+            {
+              "id": "node_open_pause_menu",
+              "type": "open_menu",
+              "params": {
+                "layout": "pause_menu"
+              },
+              "x": 1191
+            }
+          ]
+        }
+      ],
+      "registryKey": "generic_button",
+      "label": "MENU",
+      "data": {
+        "lastTap": 0
+      }
+    }
+   
+  ]
+}

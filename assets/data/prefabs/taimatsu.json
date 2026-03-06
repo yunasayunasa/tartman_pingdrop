@@ -1,0 +1,25 @@
+{
+  "name": "taimatsu",
+  "type": "Image",
+  "depth": 0,
+  "scaleX": 0.1,
+  "scaleY": 0.1,
+  "angle": 0,
+  "alpha": 1,
+  "layer": "Gameplay",
+  "events": [],
+  "components": [
+    {
+      "type": "LightComponent",
+      "params": {
+        "radius": 310,
+        "intensity": 0.17
+      }
+    }
+   
+  ],
+  "texture": "taimatsu_on",
+  "data": {
+    "lastTap": 1759991745005
+  }
+}

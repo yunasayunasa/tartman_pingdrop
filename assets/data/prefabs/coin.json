@@ -1,0 +1,22 @@
+{
+  "name": "coin",
+  "type": "Sprite",
+  "texture": "next_arrow",
+  "animation": {
+    "default": "coin_spin"
+  },
+  "group": "collectible",
+  "components": [],
+  "physics": {
+    "isStatic": true,
+    "ignoreGravity": true,
+    "shape": "circle"
+  },
+  "events": [
+    {
+      "trigger": "onCollide_Start",
+      "targetGroup": "player",
+      "actions": "[play_sound key=smash]"
+    }
+  ]
+}

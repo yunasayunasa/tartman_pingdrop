@@ -1,0 +1,168 @@
+
+Odyssey Engine v5.0 - Internal Architecture Specification (FINAL REVISION)
+Document ID: OE-IAS-3.0-FINAL-R2
+Version: 5.0 Revision 2 (Final)
+Classification: GEMINI_INTERNAL_SPEC_COMPLETE
+Objective: To provide a definitive, logically-structured, and comprehensive model of the Odyssey Engine's architecture, data flow, and core protocols. This document incorporates the evolution to a Dual Architecture Model (Scenario-Driven and Data-Driven), the integration of the In-Game Editor (IDE Mode), the Component System, and the State Machine Runtime. It supersedes all previous versions.
+
+SECTION 1: SYSTEM ARCHITECTURE & LIFECYCLE
+1.1. Core Principle: Dual Architecture & Centralized Mediation
+The system has evolved into a Dual Architecture model to support both narrative-heavy and gameplay-heavy scenes, while retaining the core Mediator pattern.
+
+Scenario-Driven Scenes (e.g., GameScene): The primary state and flow are controlled by the ScenarioManager interpreting .ks files. These scenes are stateful and optimized for complex narrative branching and persistence.
+Data-Driven Scenes (e.g., JumpScene, future scenes inheriting from BaseGameScene): The initial state, object layout, and physical properties are defined by external .json data files. These scenes are designed for gameplay mechanics (action, puzzles) and are primarily managed through the in-game editor.
+SystemScene remains the central mediator, orchestrating all scene transitions. StateManager remains the Single Source of Truth for game variables.
+1.2. Service Locator & Instantiation Locus (ADDENDUM)
+A new set of services related to the In-Game Editor (IDE Mode) is introduced.
+
+Service	Class	Initialization Locus	Registry Key	Criticality	Description
+Editor Plugin	EditorPlugin	main.js (config) & SystemScene.create	editor	High (Debug)	The core controller for all in-game editing functionalities. Manages object selection, property modification, and editable object registration. It is a Phaser Global Plugin.
+Editor UI	EditorUI	SystemScene.create	N/A	High (Debug)	A pure HTML/CSS/JS controller, completely decoupled from Phaser's scene graph. Manages all DOM elements of the editor (panels, buttons, asset browser) and communicates user actions to the EditorPlugin.
+Global Asset List	Array	PreloadScene.create	asset_list	Medium	A comprehensive list of all loaded assets (key, type, path), used by the EditorUI's asset browser.
+1.3. Scene Roles & Responsibilities (REVISED)
+PreloadScene: (Responsibilities updated)
+Comprehensive Asset Loading: Loads asset_define.json and, based on its contents, queues all game assets, including individual files and dynamically sourced folder contents (scenarios, scene data JSONs), for a single, comprehensive load operation.
+Global Asset List Generation: On load.complete, generates the asset_list and registers it to the Phaser.Registry.
+(Other responsibilities remain unchanged)
+SystemScene: (Responsibilities updated)
+IDE Mode Activation: Checks for the ?debug=true URL parameter. If present, it starts the EditorPlugin and instantiates the EditorUI, establishing the link between them.
+(Other responsibilities remain unchanged)
+UIScene: (No architectural change, but clarification)
+UIScene is a Scenario-Driven scene, but its content is primarily hard-coded within its create method for stability. It can, however, have its layout overridden by a corresponding UIScene.json if the layout application logic is implemented. MessageWindows are now considered part of the GameScene's responsibility, with UIScene ensuring other UI elements render correctly around it by managing depth.
+GameScene: (Role clarified)
+Represents the canonical Scenario-Driven scene type. Its object lifecycle (chara_show, bg) is dictated by the flow of the .ks script. It does not inherit from BaseGameScene. It is a self-contained, highly specialized system for narrative delivery.
+BaseGameScene (NEW):
+Purpose: The abstract base class for all Data-Driven scenes. It provides the core logic for loading a scene-specific .json file and using it to build the scene's content.
+Lifecycle: A scene inheriting from this class (e.g., JumpScene) must call this.initSceneWithData() within its create method.
+Core Methods:
+initSceneWithData(): The entry point. Reads the corresponding .json from cache.
+buildSceneFromLayout(): Parses the JSON and orchestrates object creation and property application in a safe, two-pass process (create all -> apply all) to prevent race conditions.
+createObjectFromLayout(): A virtual method intended to be overridden by child scenes to handle the creation of scene-specific object types.
+applyProperties(): Applies transform, physics, and other component data from the JSON to a newly created GameObject. Also responsible for registering the object with the EditorPlugin.
+addObjectFromEditor(): A virtual method that defines the scene's specific protocol for handling new objects added via the editor's "Add Asset" button.
+finalizeSetup(): The final step in the creation lifecycle, responsible for calling scene-specific setup (onSetupComplete) and emitting the scene-ready event.
+SECTION 2: SCENARIO EXECUTION ENGINE (ScenarioManager.js)
+(No fundamental changes to the core loop. This section remains valid for GameScene.)
+
+SECTION 3: SCENE TRANSITION & PERSISTENCE PROTOCOL
+3.1. Scene Transition Protocol (REVISED)
+The protocol remains mediated by SystemScene, but the handshake mechanism is now standardized.
+
+Handshake Protocol:
+GameScene: Emits the specific gameScene-load-complete event on completion of its complex create or performLoad methods.
+All other scenes (especially BaseGameScene children): Emit the generic scene-ready event upon completion of their setup (typically at the end of finalizeSetup).
+SystemScene._startAndMonitorScene: Correctly listens for the appropriate event based on the sceneKey.
+Transition Flow Amendment (_handleRequestSceneTransition): To prevent race conditions between a scene shutting down and a new one starting, the flow is now event-based.
+_handleRequestSceneTransition receives a request.
+It registers a once listener for the shutdown event of the from scene.
+It calls this.scene.stop(from).
+Only within the shutdown event's callback does it proceed to call _startAndMonitorScene for the to scene. This guarantees the old scene is completely gone before the new one begins its lifecycle.
+SECTION 4: IN-GAME EDITOR (IDE MODE) PROTOCOLS (NEW SECTION)
+4.1. Core Principle: Decoupled MVC-like Pattern
+The editor operates on a pattern resembling Model-View-Controller, completely decoupled from the game's core logic.
+
+Model: The game's scene graph (the GameObject instances and their properties) is the model.
+View: The HTML/CSS panels (#editor-panel, #asset-browser) are the view.
+Controller: A dual-controller system:
+EditorPlugin: The primary controller acting on the Model (Phaser world). It directly manipulates GameObjects.
+EditorUI: The secondary controller acting on the View (HTML world). It listens for DOM events and translates them into commands for the EditorPlugin or the active scene.
+4.2. Object Creation & Registration Protocol (Definitive)
+This protocol unifies object creation from all sources (JSON, D&D, scenario tags) for editor compatibility.
+
+Instantiation: An object is created, either by scene.add.image (GameScene, scenario tags) or new Phaser.GameObjects.Image (BaseGameScene, EditorUI).
+Naming: A unique name property MUST be assigned to the GameObject. This is the primary key for layout persistence and editor selection.
+Registration: The object MUST be passed to the EditorPlugin's makeEditable(gameObject, scene) method.
+makeEditable is idempotent; it performs the initial setup (setInteractive, event listeners) only once per object.
+Crucially, it adds/updates the object's reference in the editableObjects map, ensuring its properties are correctly exported.
+4.3. Data Persistence Protocol (Editor I/O)
+Export (exportLayoutToJson):
+Trigger: User clicks the "Export" button in the property panel.
+Source Scene: Determined by this.selectedObject.scene.
+Source Data: The editableObjects map for the corresponding sceneKey.
+Process: Iterates through the registered GameObject set for that scene, serializing key component data (Transform, Physics) into a JSON structure.
+Output: The generated JSON string is logged to the console and copied to the user's clipboard.
+Import (Layout Application):
+Locus: BaseGameScene.initSceneWithData() for data-driven scenes. GameScene.create() contains a custom implementation for its specific needs.
+Trigger: Scene creation.
+Source Data: The .json file corresponding to the sceneKey, pre-loaded by PreloadScene.
+Process: The scene reads the JSON objects array. For each entry, it instantiates the corresponding GameObject and applies the stored component properties. It then ensures the object is registered with the editor via the Registration Protocol (4.2).
+SECTION 5: DEVELOPMENT & EXTENSION CONTRACTS (REVISED)
+5.1. Contract: Adding a New Data-Driven Scene
+This supersedes the old "New Game Scene" contract for any non-narrative scene.
+
+Inherit BaseGameScene: The class MUST extend BaseGameScene.
+Call initSceneWithData: The create() method MUST call this.initSceneWithData() to trigger the data-driven setup process.
+Implement addObjectFromEditor: To support the editor's "Add Asset" button, the scene MUST implement the addObjectFromEditor(assetKey, newName) method. This method is responsible for instantiating a new object and passing it to a setup routine like applyProperties.
+Use onSetupComplete for Post-Layout Logic: Any logic that depends on all objects being present and configured (e.g., setting up physics colliders) MUST be placed in an onSetupComplete() method.
+Adhere to Core Contracts: The universal rules of BGM playback (create), scene termination (return-to-novel), and resource cleanup (shutdown) remain in effect.
+SECTION 6: COMPONENT-BASED ENTITY SYSTEM (NEW SECTION)
+6.1. Core Principle: Composition over Inheritance
+In Data-Driven Scenes, GameObjects are treated as simple "property bags". Their behavior and functionality are not defined by extending a complex class hierarchy, but by attaching modular, reusable Components.
+
+6.2. Component Definition & Registration
+Definition: A Component is a plain JavaScript class (e.g., PlayerController, StateMachineComponent). It does not inherit from a base Component class.
+Constructor: The constructor MUST accept the signature (scene, owner, params = {}), where scene is the scene instance and owner is the GameObject to which it is being attached.
+Owner Reference: The component MUST store a reference to its owner object under the property name this.gameObject. This is a strict contract for the engine's update loop.
+Registration: All components MUST be registered in the ComponentRegistry object located in src/components/index.js. This allows the engine to instantiate them by their string name (e.g., 'PlayerController').
+6.3. Component Lifecycle Protocol
+The lifecycle of a component is managed entirely by BaseGameScene.
+
+Instantiation Locus: BaseGameScene.addComponent(gameObject, componentType, params). This method is called by applyProperties when a components array is found in the JSON layout data for a GameObject.
+Initialization (start): Immediately after instantiation, addComponent checks if the component instance has a start() method. If it does, it is called once. This method is intended for setup logic that needs to run after the component is created but before the first update.
+Update Loop (update): addComponent also checks for an update(time, delta) method. If found, the component instance is added to the scene's updatableComponents Set. The BaseGameScene.update() method iterates over this set every frame and calls each component's update method, providing the global time and frame delta.
+Destruction: There is no automatic destroy call. Components that create persistent listeners or objects (e.g., keyboard listeners in Interactor) MUST implement a destroy() method that is called manually when the owner GameObject is destroyed to prevent memory leaks.
+SECTION 7: STATE MACHINE RUNTIME PROTOCOL (NEW SECTION)
+7.1. Runtime Core: StateMachineComponent
+The StateMachineComponent is the runtime engine that interprets the stateMachine data created by the VSL editor and attached to a GameObject.
+
+State Tracking: It maintains the currentStateName and a reference to the current state's logic object (currentStateLogic).
+Lifecycle Execution: Its transitionTo(newStateName) method orchestrates state changes:
+It calls ActionInterpreter.run() for the onExit VSL of the current state.
+It updates the internal state to the new state.
+It calls ActionInterpreter.run() for the onEnter VSL of the new state.
+Re-entrant Safety: Crucially, all calls to ActionInterpreter.run() from within the component are "fire-and-forget" (i.e., not awaited). This prevents the ActionInterpreter, a global singleton, from being deadlocked by re-entrant calls (e.g., an onEnter event triggering another state transition).
+Update Loop Integration: The component's update() method calls ActionInterpreter.run() for the onUpdate VSL of the current state every frame, as managed by the BaseGameScene's component update loop.
+7.2. ActionInterpreter Integration & Physics Safety
+VSL Tag: The [state_transition] tag handler is the bridge between the VSL and the runtime. It retrieves the StateMachineComponent from the target GameObject and calls its transitionTo() method.
+Physics Interaction Protocol: Any VSL tag handler that directly modifies the physics state of a GameObject (e.g., apply_force, destroy) presents a race condition if called from within a Matter.js collision event callback.
+Contract: Such handlers MUST NOT directly call physics-altering functions (e.g., gameObject.applyForce()).
+Deferred Execution Queue: Instead, they MUST use the BaseGameScene.deferAction(callback) method. This pushes the function into a queue.
+Execution Locus: BaseGameScene.update() executes and clears this queue at the beginning of every frame. This guarantees that all physics modifications occur at a safe point in the engine's update loop, ensuring stability and predictable behavior.
+SECTION 8: GAME FLOW STATE MACHINE PROTOCOL (NEW SECTION, V5.1)
+8.1. Core Principle: Decoupling Game State from Scene Implementation
+The introduction of the GameFlowManager service establishes a high-level, finite state machine (FSM) that governs the overall game state (e.g., Title, InGame, Paused). This FSM supersedes all previous ad-hoc state management and scene transition logic previously handled by SystemScene event listeners. The primary objective is to make the game's macro-flow declarative, predictable, and decoupled from the internal implementation of individual scenes.
+8.2. Architectural Components & Data Flow
+game_flow.json (The Blueprint): A static JSON asset that declaratively defines the entire game flow. It is the single source of truth for all possible states, the events that trigger transitions between them, and the actions to be executed upon entering, exiting, or during a transition. This file is loaded by PreloadScene and parsed by GameFlowManager.
+GameFlowManager.js (The Conductor): A global service, instantiated by SystemScene. Its sole responsibilities are:
+To parse game_flow.json and initialize the FSM.
+To maintain the currentState of the game.
+To expose a single public method, handleEvent(eventName, data), to the rest of the engine.
+To execute declarative actions defined in the blueprint by invoking the appropriate methods on the EngineAPI. It MUST NOT directly interact with Phaser's Scene Manager or any scene instance.
+EngineAPI.js (The Official Interface): The sole, mandatory interface between the GameFlowManager and the rest of the engine (SystemScene, SceneTransitionManager, OverlayManager). The GameFlowManager's actions map directly to methods on the EngineAPI.
+Key Contract: All engine-level operations that are asynchronous (e.g., scene transitions, waiting for an overlay to close) MUST be exposed via EngineAPI methods that return a Promise. The GameFlowManager's executeActions method MUST be async and MUST await these Promise-returning methods to ensure sequential, non-competing execution of state transitions.
+SystemScene.js (The Low-Level Executor): Acts as the low-level "driver" for engine operations, but only when commanded by the EngineAPI. It exposes internal methods (e.g., _safeResumeScene) that are wrapped by the public EngineAPI. It is responsible for direct interaction with Phaser's Scene Manager API (this.scene.pause, this.scene.resume, etc.).
+8.3. State Transition & Scene Lifecycle Protocol (Definitive)
+This protocol replaces previous scene transition mechanisms and resolves race conditions related to scene lifecycles.
+Event Trigger: An external event (e.g., UI button click, scenario tag execution) calls EngineAPI.fireGameFlowEvent(eventName, data).
+FSM Evaluation: GameFlowManager receives the event, consults its state definition for the currentState, and identifies a valid transition.
+Action Execution (Asynchronous Contract): GameFlowManager calls its async executeActions method.
+If the transition defines an action (e.g., closeOverlay), it is executed first via await EngineAPI.requestCloseOverlay().
+The FSM transitions to the to state.
+The onEnter actions of the new state are executed, again using await for any asynchronous operations (e.g., await EngineAPI.requestSafeResume()).
+Asynchronous resume Protocol (Critical):
+EngineAPI.requestSafeResume(sceneKey): Returns a new Promise. It does not resolve immediately. It calls SystemScene._safeResumeScene.
+SystemScene._safeResumeScene(sceneKey, onComplete): Registers a targetScene.events.once('resume', ...) listener. It then calls this.scene.resume(sceneKey).
+Phaser Scene Manager: Performs the internal resume operation. Upon completion, it emits the 'resume' event.
+SystemScene Listener: The 'resume' event triggers the listener's callback, which in turn calls the onComplete callback passed from the EngineAPI.
+EngineAPI Promise: The onComplete callback calls the resolve function of the Promise, completing the await in GameFlowManager. This guarantees the FSM does not proceed until the Phaser scene is verifiably active.
+Asynchronous Overlay Protocol (Critical):
+EngineAPI.runScenarioAsOverlay(...): Returns a new Promise. It registers a systemScene.events.once('overlay-closed', ...) listener. It then calls OverlayManager.openNovelOverlay.
+[overlay_end] tag: Triggers EngineAPI.requestCloseOverlay.
+OverlayManager.closeOverlay(...): Registers a sceneToClose.events.once('shutdown', ...) listener, then calls this.systemScene.scene.stop(...).
+shutdown event: The listener's callback executes. It calls this.systemScene.scene.remove(...) to prevent key duplication errors, and finally emits the global 'overlay-closed' event.
+EngineAPI listener: The 'overlay-closed' event triggers the listener, which resolves the Promise, completing the await in GameFlowManager.
+8.4. OverlayManager Revised Responsibilities
+The OverlayManager is now a pure "scene lifecycle executor" with no knowledge of game state.
+Contract: It MUST NOT call scene.pause or scene.resume. These are the sole responsibility of the GameFlowManager via pauseScene/resumeScene actions.
+NovelOverlayScene Management: To prevent state corruption between uses, the OverlayManager MUST adhere to a strict add -> launch -> stop -> remove lifecycle for NovelOverlayScene. The remove operation MUST be deferred until after the scene's 'shutdown' event has been received to prevent race conditions and "duplicate key" errors.
+END OF DOCUMENT

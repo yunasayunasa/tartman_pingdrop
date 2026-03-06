@@ -1,0 +1,113 @@
+{
+  "images": {
+    "message_window": "assets/images/message_window.png",
+    "vignette_overlay_image": "assets/images/vignette_overlay.png",
+    "vignette_overlay": "assets/images/vignette_overlay.png",
+    "clear_obj": "assets/images/clear_obj.png",
+    "yuna_normal": "assets/images/yuna_smile.png",
+    "kaito_normal": "assets/images/kaito_normal.png",
+    "bg_school": "assets/images/bg_school.jpg",
+    "cg01": "assets/images/event_cg_01.jpg",
+    "yuna_angry": "assets/images/title_button.png",
+    "next_arrow": "assets/images/next_arrow.png",
+    "roger_normal": "assets/images/roger_normal.png",
+    "tileset_terrain": "assets/images/tileset_terrain.png",
+    "title": "assets/images/title.jpeg",
+    "cutscene": "assets/images/cutscene.png",
+    "gran_normal": "assets/images/gran_normal.png",
+    "rulia_monster": "assets/images/rulia_moster.png",
+    "anila_normal": "assets/images/anila_normal.png",
+    "tartman_normal": "assets/images/tartman_normal.png",
+    "mado_wood": "assets/images/mado_wood_02.png",
+    "maptile_wood": "assets/images/maptile_wood_02.png",
+    "taru": "assets/images/taru.png",
+    "chest": "assets/images/chest.png",
+    "hasira_bottom": "assets/images/hasira_bottom.png",
+    "hasira_center": "assets/images/hasira_center.png",
+    "taimatsu_on": "assets/images/taimatsu_on.png"
+  },
+  "spritesheets": {
+    "walk": {
+      "path": "assets/images/walk.png",
+      "frameWidth": 102,
+      "frameHeight": 115
+    },
+    "anila_walk": {
+      "path": "assets/images/anila_walk.png",
+      "frameWidth": 292,
+      "frameHeight": 292
+    },
+    "tartman_run": {
+      "path": "assets/images/tartman_run.png",
+      "frameWidth": 292,
+      "frameHeight": 292
+    },
+    "gran_walk": {
+      "path": "assets/images/gran_walk.png",
+      "frameWidth": 292,
+      "frameHeight": 292
+    }
+  },
+  "sounds": {
+    "popopo": "assets/gyakuten_popopo.mp3",
+    "night_bgm": "assets/audio/night_bgm.mp3",
+    "blood": "assets/audio/blood.mp3",
+    "walk": "assets/audio/walk.mp3",
+    "cafe": "assets/cafe.mp3",
+    "bgm_action": "assets/gyakuten_bgm.mp3",
+    "ronpa_bgm": "assets/ronpa_bgm.mp3",
+    "smash": "assets/smash.mp3"
+  },
+  "//": "--- ここからが新しいカテゴリです ---",
+  "prefabs": [
+    {
+      "key": "coin",
+      "path": "data/prefabs/coin.json"
+    },
+    {
+      "key": "taimatsu",
+      "path": "data/prefabs/taimatsu.json"
+    },
+    {
+      "key": "my_unit_01",
+      "path": "data/prefabs/my_unit_01.json"
+    }
+  ],
+  "file_lists": {
+    "scenarios": {
+      "path": "assets/scenarios/",
+      "type": "text",
+      "list": [
+        "scene1.ks",
+        "scene2.ks",
+        "overlay_test.ks",
+        "test.ks",
+        "test_main.ks",
+        "test_sub.ks",
+        "trial_test.ks"
+      ]
+    },
+    "scene_layouts": {
+      "path": "assets/data/scenes/",
+      "type": "json",
+      "list": [
+        "GameScene.json",
+        "UIScene.json",
+        "stage2.json",
+        "stage3.json",
+        "JumpScene.json",
+        "TitleScene.json",
+        "pause_menu.json",
+        "trial_demo.json"
+      ]
+    },
+    "//": "--- ここにタイルセット用の定義を追加 ---",
+    "tilesets": {
+      "path": "assets/tilesets/",
+      "type": "image",
+      "list": [
+        "tileset_terrain.png"
+      ]
+    }
+  }
+}

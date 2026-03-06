@@ -1,0 +1,605 @@
+/* ==========================================================================
+   Odyssey Engine - Main Stylesheet
+   Version: 2.3 (Direct Container Resizing Final)
+   ========================================================================== */
+
+/* --- 基本設定 --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: #1e1e1e;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #d4d4d4;
+    position: relative;
+}
+
+/* --- ゲームコンテナのスタイル --- */
+/* 通常モードでは画面全体を覆う。Phaserはこの中で中央揃えを行う */
+#game-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- エディタUIのルート --- */
+#editor-root {
+    display: none;
+}
+
+
+/* ==========================================================================
+   DEBUG MODE STYLES
+   ========================================================================== */
+
+body.debug-mode {
+    background-color: #3d3d3d;
+}
+
+body.debug-mode #editor-root {
+    display: block;
+}
+
+/* ▼▼▼【 L字レイアウトの最終FIX 】▼▼▼ */
+/* デバッグモードの時、#game-containerの幅を直接変更して、
+   サイドバーが表示されるスペースを空ける */
+body.debug-mode #game-container {
+    width: calc(100% - 340px); /* サイドバーの幅(340px)だけ狭くする */
+}
+/* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
+
+
+/* --- 右サイドバー --- */
+#editor-sidebar {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 340px;
+    height: 100vh;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: #252526;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+    overflow-y: auto;
+}
+
+
+/* (以下、変更なし) */
+/* ==========================================================================
+   以降のスタイル
+   ========================================================================== */
+.editor-panel { background-color: #1e1e1e; border: 1px solid #3c3c3c; border-radius: 5px; display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; }
+#asset-browser { flex: 1; } /* ★ flexの比率を調整 */
+#editor-panel { flex: 1; }
+#layers-panel { flex-basis: 180px; } /* ★ レイヤーパネルの高さを固定 */
+* --- レイヤーパネルの中身 --- */
+#layer-list {
+    padding: 5px; /* 少し余白を詰める */
+}
+
+.layer-item {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    user-select: none;
+    margin-bottom: 3px;
+    border: 1px solid transparent; /* 非アクティブ時のボーダー */
+}
+
+.layer-item.active {
+    background-color: #094771; /* アクティブなレイヤーの背景色 */
+    border-color: #0e639c;
+}
+
+.layer-item:not(.active):hover {
+    background-color: #3c3c3c;
+}
+
+.layer-name {
+    flex-grow: 1;
+    margin: 0 8px;
+    font-size: 14px;
+}
+
+.layer-control {
+    background: none;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 2px;
+}
+.layer-control.locked,
+.layer-control.hidden {
+    color: #666; /* ロック/非表示状態の色 */
+}
+.panel-header { padding: 8px 12px; background-color: #3c3c3c; border-bottom: 1px solid #1e1e1e; font-weight: bold; display: flex; align-items: center; justify-content: space-between; user-select: none; }
+.panel-header-buttons { display: flex; align-items: center; gap: 8px; }
+.panel-header-buttons button { padding: 2px 8px; border-radius: 4px; border: 1px solid #555; background-color: #444; color: #eee; cursor: pointer; font-size: 1em; }
+.panel-header-buttons button:hover { background-color: #5a5a5a; }
+.panel-content { padding: 10px; flex-grow: 1; overflow-y: auto; }
+.panel-footer-button { width: 100%; padding: 10px; background-color: #0e639c; color: white; border: none; cursor: pointer; font-size: 14px; border-top: 1px solid #3c3c3c; }
+.panel-footer-button:hover { background-color: #1177bb; }
+.panel-tabs { display: flex; background-color: #252526; border-bottom: 1px solid #3c3c3c; padding: 5px 5px 0 5px; gap: 5px;overflow-x: auto; /* 横方向にはみ出たら、スクロールバーを出す */
+    flex-shrink: 0;   /* 親要素が縮んでも、このタブコンテナ自体は縮まないようにする */ }
+.asset-tab { padding: 8px 12px; border: 1px solid #3c3c3c; border-bottom: none; background-color: #1e1e1e; color: #888; cursor: pointer; border-radius: 4px 4px 0 0; user-select: none; }
+.asset-tab.active { background-color: #2b2b2b; color: #eee; border-color: #555; }
+.asset-item { display: flex; align-items: center; padding: 5px; border-bottom: 1px solid #3c3c3c; cursor: pointer; user-select: none; }
+.asset-item:hover { background-color: #3c3c3c; } .asset-item.selected { background-color: #094771; }
+.asset-preview { width: 48px; height: 48px; object-fit: contain; margin-right: 10px; background-color: #1e1e1e; border: 1px solid #3c3c3c; display: flex; justify-content: center; align-items: center; }
+#editor-props div { margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+#editor-props label { display: inline-block; width: 80px; font-size: 13px; margin-right: 5px; color: #ccc; flex-shrink: 0; }
+#editor-props input, #editor-props select, #editor-props textarea { flex-grow: 1; background-color: #3c3c3c; border: 1px solid #1e1e1e; color: #d4d4d4; padding: 4px; border-radius: 3px; width: auto; }
+#editor-props hr { border: none; border-top: 1px solid #3c3c3c; margin: 15px 0; }
+#editor-props button { width: 100%; padding: 8px; background-color: #0e639c; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;   user-select: none; /* この一行を追加 */
+    -webkit-user-select: none; /* Safari/Chrome向け */
+    -ms-user-select: none; /* IE向け */ }
+#editor-props button:hover { background-color: #1177bb; }
+#overlay-controls { position: fixed; bottom: 10px; left: 10px; z-index: 10000; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; transition: transform 0.3s ease-in-out; }
+#camera-controls { background-color: rgba(40, 40, 40, 0.8); border-radius: 5px; padding: 5px; display: flex; gap: 5px; }
+#camera-controls button { width: 35px; height: 35px; font-size: 16px; font-weight: bold; cursor: pointer; background-color: #555; color: #eee; border: 1px solid #777; border-radius: 5px; }
+#camera-controls button:hover { background-color: #6a6a6a; } #camera-controls button:active { background-color: #4a4a4a; }
+#editor-mode-controls { display: flex; align-items: center; gap: 10px; background-color: rgba(40, 40, 40, 0.8); padding: 5px; border-radius: 5px; color: white; font-size: 14px; user-select: none; }
+.mode-button { padding: 5px 15px; border: 1px solid #333; background-color: #555; color: #ccc; cursor: pointer; }
+.mode-button.active { background-color: #0e639c; color: white; }
+.mode-switch { position: relative; display: inline-block; width: 50px; height: 24px; }
+.mode-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #888; transition: .4s; border-radius: 24px; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+input:checked + .slider { background-color: #2196F3; } input:checked + .slider:before { transform: translateX(26px); }
+#bottom-panel { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #252526; border-top: 1px solid #3c3c3c; z-index: 9995; height: 220px; transform: translateY(100%); transition: transform 0.3s ease-in-out; display: none; }
+#tilemap-editor-panel { display: flex; height: 100%; padding: 10px; gap: 10px; }
+.bottom-panel-section{background-color:#1e1e1e;border:1px solid #3c3c3c;border-radius:5px;display:flex;flex-direction:column;overflow:hidden}.panel-section-header{padding:5px 10px;background-color:#3c3c3c;font-weight:700;font-size:13px;user-select:none}.panel-section-content{padding:5px;flex-grow:1;overflow:auto}#tools-panel{flex-basis:80px;flex-shrink:0}#tools-panel .panel-section-content{display:flex;flex-direction:column;gap:5px}.tool-button{width:100%;height:40px;background-color:#555;border:1px solid #777;border-radius:3px;cursor:pointer}.tool-button:hover{background-color:#6a6a6a}.tool-button.active{background-color:#0e639c;border-color:#1177bb}.tool-button img{width:24px;height:24px}#layers-panel{flex-basis:200px;flex-shrink:0}.layer-item{display:flex;align-items:center;padding:5px;gap:10px;cursor:pointer;user-select:none}.layer-item:hover{background-color:#3c3c3c}.layer-item .layer-name{flex-grow:1}
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 10000; display: none; justify-content: center; align-items: center; }
+.modal-overlay.is-active { display: flex; }
+.modal-window { width: 90%; max-width: 700px; max-height: 80vh; background-color: #2b2b2b; border-radius: 8px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; }
+.modal-header { padding: 10px 15px; background-color: #3c3c3c; display: flex; align-items: center; border-bottom: 1px solid #1e1e1e; user-select: none; }
+.modal-header h3 { margin: 0; font-size: 1.1em; }
+.modal-close-btn, .modal-help-btn { cursor: pointer; border: none; background: none; color: #d4d4d4; font-size: 24px; line-height: 1; padding: 0 5px; }
+.modal-help-btn { margin-left: auto; font-size: 18px; width: 24px; height: 24px; border-radius: 50%; background-color: #555; }
+.modal-content { padding: 15px; overflow-y: auto; flex-grow: 1; }
+.modal-sub-panel { display: none; padding: 15px; background-color: #1e1e1e; border-top: 1px solid #555; max-height: 200px; overflow-y: auto; }
+.modal-sub-panel.is-visible { display: block; }
+body.modal-open canvas, body.modal-open #editor-root { pointer-events: none;  }
+#event-editor-content label{display:inline-block;width:auto;margin-right:5px;color:#ccc;flex-shrink:0}#event-editor-content input,#event-editor-content select,#event-editor-content textarea{flex-grow:1;background-color:#3c3c3c;border:1px solid #1e1e1e;color:#d4d4d4;padding:4px;border-radius:3px;width:auto}#event-editor-content .add-event-button{width:100%;padding:10px;margin-top:15px;background-color:#4a8a4a;color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:14px}#event-editor-content .add-event-button:hover{background-color:#5cb85c}
+
+#help-modal-overlay,#event-editor-overlay,#anim-editor-overlay,
+#sm-editor-overlay { /* ← この行を追加 */
+    z-index:100000;
+    pointer-events:auto;
+}
+
+
+#help-modal-overlay .modal-window,#event-editor-overlay .modal-window,#anim-editor-overlay .modal-window{z-index:10001;pointer-events:all}
+/* ==========================================================================
+   Visual Scripting Language (VSL) Editor Styles
+   ========================================================================== */
+
+/* --- メインコンテンツエリアを、ツールバーとキャンバスに分割 --- */
+#event-editor-main-content {
+    display: flex;
+    flex-direction: row;
+    padding: 0; /* 内側の余白は不要に */
+}
+
+/* --- (左側) ツールバー --- */
+#vsl-toolbar {
+    width: 200px;
+    padding: 10px;
+    background-color: #252526; /* サイドバーと同じ背景色 */
+    border-right: 1px solid #3c3c3c;
+    flex-shrink: 0; /* 縮まないようにする */
+    overflow-y: auto;
+}
+
+#vsl-toolbar h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+#vsl-node-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.node-add-button {
+    width: 100%;
+    padding: 8px;
+    background-color: #3c3c3c;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    text-align: left;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.node-add-button:hover {
+    background-color: #555;
+}
+
+/* --- (右側) キャンバス --- */
+#vsl-canvas-wrapper {
+    flex-grow: 1; /* 残りのスペースをすべて使う */
+    position: relative; /* ノードを絶対位置で配置するための基準 */
+    overflow: auto; /* ノードがはみ出たらスクロールできるように */
+    min-width: 0;
+}
+
+#vsl-canvas {
+    position: relative;
+    width: 2000px;  /* 広大な作業スペースを確保 */
+    height: 2000px;
+    background-color: #1e1e1e;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px; /* 背景にグリッドを描画 */
+}
+
+
+/* ▼▼▼【これが、ノードの「見た目」を定義するCSSです】▼▼▼ */
+/* ------------------------------------------------------------------ */
+/* in your style.css */
+/* style.css */
+
+/* ノードの位置を決めるラッパー */
+.vsl-node-wrapper {
+    position: absolute; /* キャンバス内での位置決め */
+}
+
+/* ノード本体 (ピンの基準点) */
+.vsl-node {
+    display: flex; /* ★ 横並びのレイアウト */
+    align-items: center; /* 列の高さを中央で揃える */
+    background-color: #2b2b2b;
+    border: 1px solid #555;
+    border-radius: 5px;
+    padding: 8px 0; /* 上下のパディング */
+    min-width: 180px; /* 少し幅を広げる */
+    color: #d4d4d4;
+    /* position: relative は不要 */
+}
+
+/* 列1, 3: ピンのコンテナ */
+.vsl-pins-container {
+    display: flex;
+    flex-direction: column; /* ピンを縦に並べる */
+    justify-content: space-around; /* ピンを均等に配置 */
+    align-self: stretch; /* 親の高さ一杯に伸びる */
+}
+.vsl-pins-container.inputs {
+    align-items: flex-start; /* 左寄せ */
+}
+.vsl-pins-container.outputs {
+    align-items: flex-end; /* 右寄せ */
+}
+
+/* ピンとラベルのラッパー */
+.vsl-pin-wrapper {
+    display: flex;
+    align-items: center;
+    padding: 4px 0; /* ピンの上下の間隔 */
+}
+
+/* ピン自体のスタイル */
+.vsl-node-pin {
+    width: 12px;
+    height: 12px;
+    background-color: #777;
+    border: 1px solid #aaa;
+    border-radius: 50%;
+    cursor: crosshair;
+}
+.vsl-node-pin:hover {
+    background-color: #eee;
+}
+
+/* ピンのラベル */
+.pin-label {
+    font-size: 11px;
+    color: #ccc;
+    white-space: nowrap; /* ラベルが改行しないように */
+}
+.vsl-pins-container.inputs .pin-label {
+    margin-left: 6px; /* 入力ピンとラベルの間隔 */
+}
+.vsl-pins-container.outputs .pin-label {
+    margin-right: 6px; /* 出力ピンとラベルの間隔 */
+}
+
+/* 列2: 中央のコンテンツ */
+.vsl-node-content {
+    flex-grow: 1; /* 残りの幅をすべて使う */
+    padding: 0 10px; /* 両脇のピン列との間に隙間を確保 */
+    /* この中の要素 (.node-paramsなど) のスタイルは変更なし */
+}
+
+/* (以下、.node-params, .node-param-row, inputなどのスタイルは変更なし) */
+
+.vsl-node strong {
+    font-weight: bold;
+    color: #569cd6; /* タグ名を青っぽくする */
+}
+.vsl-node .node-params {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.vsl-node .node-param-row {
+    display: flex;
+    align-items: center;
+}
+
+.vsl-node label {
+    font-size: 12px;
+    color: #aaa;
+    margin-right: 5px;
+}
+
+.vsl-node input[type="text"] {
+    width: 100%;
+    background-color: #1e1e1e;
+    border: 1px solid #555;
+    color: #d4d4d4;
+    padding: 3px;
+    border-radius: 2px;
+    font-size: 12px;
+}
+
+#vsl-svg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none; /* SVG自体はクリックイベントを拾わないようにする */
+}
+   /* style.css */
+.node-delete-button {
+    margin-top: 10px;
+    padding: 3px 8px;
+    background-color: #8c3d3d; /* 赤系の色 */
+    border: 1px solid #c05555;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+    font-size: 12px;
+}
+.node-delete-button:hover {
+    background-color: #a14d4d;
+}
+
+
+/* style.css */
+
+/* --- ステートマシン・エディタの基本レイアウト --- */
+#sm-editor-body {
+    display: flex; /* 左右にペインを分割 */
+    flex-grow: 1; /* 親の高さ一杯に伸びる */
+    overflow: hidden; /* はみ出しを隠す */
+}
+
+/* 左ペイン: 状態リスト */
+#sm-states-panel {
+    width: 200px;
+    min-width: 150px; /* 最小幅 */
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #333;
+}
+#sm-states-panel .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #3c3c3c;
+}
+#sm-states-panel .panel-header h4 {
+    margin: 0;
+}
+#sm-states-list {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+.sm-state-item {
+    padding: 10px 8px;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+}
+.sm-state-item:hover {
+    background-color: #4f4f4f;
+}
+.sm-state-item.active {
+    background-color: #4a6da7; /* 選択中の色 */
+    font-weight: bold;
+}
+
+
+/* 右ペイン: VSL編集エリア */
+#sm-vsl-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+      overflow: hidden; /* ★★★ 追加: はみ出しを確実にクリップする */
+    min-width: 0;      /* ★★★ 追加: この要素自体も縮小できるようにする */
+}
+
+/* イベントフックのタブ */
+#sm-hooks-tabs {
+    display: flex;
+    background-color: #252526;
+    border-bottom: 1px solid #333;
+}
+.sm-hook-tab {
+    padding: 8px 16px;
+    background-color: transparent;
+    border: none;
+    color: #ccc;
+    cursor: pointer;
+    border-bottom: 2px solid transparent; /* 非アクティブ時の下線 */
+}
+.sm-hook-tab:hover {
+    background-color: #3e3e42;
+}
+.sm-hook-tab.active {
+    color: white;
+    font-weight: bold;
+    border-bottom: 2px solid #569cd6; /* アクティブ時の下線 */
+}
+
+/* VSLエディタのラッパー (イベントエディタと共通) */
+/* もし既存のスタイルがあれば、それを共用できる */
+.vsl-editor-wrapper {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+/* in style.css (末尾に追加) */
+
+/* ==========================================================================
+   State Machine VSL Editor Styles (Separated)
+   ========================================================================== */
+
+/* --- ステートマシン用のVSLコンテナ --- */
+.sm-vsl-editor-container {
+    display: flex;
+    flex-direction: row;
+    flex-grow: 1;
+    overflow: hidden;
+    width: 100%;
+    min-height: 0;
+}
+
+/* --- ステートマシン用のツールバー --- */
+.sm-vsl-toolbar {
+    width: 250px;
+    flex-shrink: 0;
+    padding: 10px;
+    background-color: #252526;
+    border-right: 1px solid #3c3c3c;
+    overflow-y: auto;
+    z-index: 10;
+}
+.sm-vsl-toolbar h4 { margin-top: 0; margin-bottom: 10px; }
+.sm-vsl-node-list { display: flex; flex-direction: column; gap: 5px; }
+
+
+/* --- ステートマシン用のキャンバスラッパー --- */
+.sm-vsl-canvas-wrapper {
+    flex: 1;
+    position: relative;
+    overflow: auto;
+    cursor: default;
+    min-width: 0; /* ★★★ この一行を追加 ★★★ */
+}
+
+/* --- ステートマシン用のキャンバス --- */
+.sm-vsl-canvas {
+    position: relative;
+    width: 4000px;
+    height: 4000px;
+    background-color: #1e1e1e;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+/* style.css の末尾あたりに追加 */
+
+/* ==========================================================================
+   Tilemap Editor Modal Styles
+   ========================================================================== */
+
+#tilemap-editor-body {
+    display: flex;
+    flex-direction: row;
+    padding: 0; /* modal-contentのデフォルトpaddingを上書き */
+}
+
+/* --- 左ペイン: リスト --- */
+#tilemap-list-panel {
+    width: 250px;
+    flex-shrink: 0;
+    border-right: 1px solid #3c3c3c;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #252526;
+}
+#tilemap-list-panel h4 { margin-top: 0; }
+.tilemap-list-item {
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+.tilemap-list-item:hover { background-color: #3c3c3c; }
+.tilemap-list-item.active { background-color: #094771; }
+
+
+/* --- 右ペイン: プレビュー --- */
+#tilemap-preview-panel {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* flexコンテナ内での縮小を許可 */
+}
+#tilemap-preview-header {
+    padding: 8px 12px;
+    background-color: #3c3c3c;
+    border-bottom: 1px solid #1e1e1e;
+    flex-shrink: 0;
+}
+#tilemap-preview-wrapper {
+    flex-grow: 1;
+    overflow: auto; /* 画像が大きければスクロールできるように */
+    background-color: #1e1e1e;
+    /* 背景グリッドはVSLキャンバスのものを流用 */
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+#tilemap-preview-content {
+    position: relative; /* クロップ範囲選択UIの基準点 */
+}
+#tilemap-action-panel {
+    padding: 10px;
+    border-top: 1px solid #3c3c3c;
+    background-color: #252526;
+    text-align: right;
+}
+#crop-and-place-btn {
+    padding: 8px 16px;
+    background-color: #0e639c;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+#crop-and-place-btn:hover { background-color: #1177bb; }
+
+/* style.css の末尾あたりに追加 */
+
+#tilemap-preview-content img {
+    -webkit-user-drag: none; /* Chrome, Safari, Opera */
+    -khtml-user-drag: none; /* Konqueror HTML */
+    -moz-user-drag: none; /* Firefox */
+    -o-user-drag: none; /* Opera versions < 12 */
+    user-drag: none; /* Standard */
+    
+    pointer-events: none; /* 画像自体がポインターイベントを拾わないようにする */
+}
+/* ... .vsl-toolbar, .vsl-canvas-wrapper などのスタイルは
+   イベントエディタのものと共通化できるはず ... */

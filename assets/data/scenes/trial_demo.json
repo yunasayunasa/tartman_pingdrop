@@ -1,0 +1,66 @@
+{
+  "scene_settings": {
+    "backgroundColor": "#000033",
+    "gravity": { "enabled": false },
+    "ySortEnabled": false
+  },
+  "objects": [
+    {
+      "name": "trial_manager",
+      "type": "container",
+      "x": 0,
+      "y": 0,
+      "components": {
+        "TrialSegmentManager": {}
+      }
+    },
+    {
+      "name": "interaction_menu",
+      "type": "container",
+      "x": 640,
+      "y": 360,
+      "components": {
+        "InteractionMenuComponent": {}
+      }
+    },
+    {
+      "name": "progress_indicator",
+      "type": "text",
+      "x": 640,
+      "y": 200,
+      "text": "議論進行…",
+      "components": {
+        "ProgressIndicatorComponent": {}
+      }
+    }
+  ],
+  "trial_data": {
+    "interval": 4000,
+    "testimonies": [
+      {
+        "id": "t1",
+        "text": "私は昨日の夜、ずっと部屋にいました。",
+        "highlights": []
+      },
+      {
+        "id": "t2",
+        "text": "誰とも会っていませんし、何も食べていません。",
+        "highlights": [
+          {
+            "text": "食べて",
+            "choices": [
+              { "text": "反論：飴を舐めていた", "correct": true },
+              { "text": "賛成：空腹だったはずだ", "correct": false },
+              { "text": "疑問：本当に何も？", "action": "update_testimony", "target": "t2", "new_text": "誰とも会っていませんし、ガムしか噛んでいません。" }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "t3",
+        "text": "魔法少女が嘘をつくはずがないでしょう？",
+        "highlights": []
+      }
+    ]
+  }
+}

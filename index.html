@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <title>Odyssey Engine</title>
+    
+    <!-- 外部CSSファイルを読み込む -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- 外部フォントを読み込む (Google Fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    
+    <!-- 外部ライブラリを読み込む -->
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
+</head>
+<body>
+
+    <!-- ====================================================================== -->
+    <!--  1. Phaser Game Container                                              -->
+    <!-- ====================================================================== -->
+    <!-- PhaserのScaleManagerが、この要素内に<canvas>を生成し、         -->
+    <!-- その位置とサイズを自動的に管理します。                               -->
+    <!-- 通常モードでは画面中央に、デバッグモードではCSSの補助で配置されます。    -->
+     <div id="app-container"></div>
+    <div id="game-container"></div>
+
+
+    <!-- ====================================================================== -->
+    <!--  2. Editor UI Root Container                                           -->
+    <!-- ====================================================================== -->
+    <!-- すべてのエディタ関連UIは、このコンテナの中に格納します。             -->
+    <!-- 通常時は display: none で非表示になり、デバッグモードでのみ表示されます。 -->
+    <div id="editor-root">
+
+        <!-- (A) Right Sidebar: アセットブラウザとプロパティパネル -->
+        <div id="editor-sidebar">
+<div id="layers-panel" class="editor-panel">
+                <div class="panel-header">
+                    <span>Layers</span>
+                    <div class="panel-header-buttons">
+                        <button id="add-layer-btn" title="Add New Layer">+</button>
+                    </div>
+                </div>
+                <div id="layer-list" class="panel-content"></div>
+            </div>
+            <!-- Asset Browser Panel -->
+            <div id="asset-browser" class="editor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Asset Browser</span>
+                    <div class="panel-header-buttons">
+                        <button id="add-text-button" title="Add New Text Object">T+</button>
+                        <!-- Help button is dynamically added here by JavaScript -->
+                    </div>
+                </div>
+                <div id="asset-tabs" class="panel-tabs">
+                    <!-- Asset category tabs are dynamically generated here -->
+                </div>
+                <div id="asset-list" class="panel-content">
+                    <!-- Asset items are dynamically generated here -->
+                </div>
+                <button id="add-asset-button" class="panel-footer-button">Add Selected Asset</button>
+            </div>
+
+            <!-- Property Editor Panel -->
+            <div id="editor-panel" class="editor-panel">
+                <div id="editor-title" class="panel-header">Properties</div>
+                <div id="editor-props" class="panel-content">
+                    <!-- Object properties will be displayed here -->
+                </div>
+            </div>
+
+        </div> <!-- /#editor-sidebar -->
+
+
+        <!-- (B) Overlay Controls: カメラ操作やモード切替など -->
+        <div id="overlay-controls">
+            <div id="camera-controls">
+                <button id="camera-zoom-in" title="Zoom In">+</button>
+                <button id="camera-zoom-out" title="Zoom Out">-</button>
+                <button id="camera-pan-up" title="Pan Up">↑</button>
+                <button id="camera-pan-down" title="Pan Down">↓</button>
+                <button id="camera-pan-left" title="Pan Left">←</button>
+                <button id="camera-pan-right" title="Pan Right">→</button>
+                <button id="camera-reset" title="Reset Camera">Reset</button>
+            </div>
+            <div id="editor-mode-controls">
+                <button id="select-mode-btn" class="mode-button active">Select</button>
+                <button id="tilemap-mode-btn" class="mode-button">Tilemap</button>
+                <!-- ▼▼▼ このボタンを追加 ▼▼▼ -->
+    <button id="editor-refresh-btn" title="Refresh Editable Objects">🔄</button>
+    <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+    
+                <label class="mode-switch" style="margin-left: auto;">
+                    <input type="checkbox" id="mode-toggle-checkbox">
+                    <span class="slider"></span>
+                </label>
+                <span id="mode-label">Select Mode</span>
+            </div>
+        </div> <!-- /#overlay-controls -->
+
+
+    <!-- (C) Bottom Panel: タイルマップエディタ -->
+        <!-- ★★★ このブロックを完全に削除 ★★★ -->
+
+
+        <!-- (D) Modal Windows -->
+        
+        <!-- ▼▼▼ ここに新しいタイルマップモーダルを追加 ▼▼▼ -->
+        <div id="tilemap-editor-overlay" class="modal-overlay">
+            <div class="modal-window wide"> <!-- wideクラスで幅広に -->
+                <div class="modal-header">
+                    <h3>Tilemap Editor</h3>
+                    <button id="tilemap-editor-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+                <div class="modal-content" id="tilemap-editor-body">
+                    <!-- 左ペイン: タイルマップリスト -->
+                    <div id="tilemap-list-panel">
+                        <h4>Tilemaps</h4>
+                        <div id="tilemap-list-container">
+                            <!-- JSでタイルマップのリストを生成 -->
+                        </div>
+                    </div>
+                    <!-- 右ペイン: プレビューと操作パネル -->
+                    <div id="tilemap-preview-panel">
+                        <div id="tilemap-preview-header">
+                            <span id="selected-tilemap-name">No tilemap selected</span>
+                        </div>
+                        <div id="tilemap-preview-wrapper">
+                            <div id="tilemap-preview-content">
+                                <!-- JSでタイルマップ画像とクロップ用のUIを生成 -->
+                            </div>
+                        </div>
+                        <div id="tilemap-action-panel">
+                            <button id="crop-and-place-btn">Crop Selection & Place</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- (D) Modal Windows -->
+        <!-- Animation Editor Modal -->
+        <div id="anim-editor-overlay" class="modal-overlay">
+            <div class="modal-window">
+                <div class="modal-header">
+                    <h3 id="animation-editor-title">Animation Editor</h3>
+                    <button id="animation-editor-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+                <div id="animation-editor-content" class="modal-content"></div>
+            </div>
+        </div>
+        <!-- Event Editor Modal -->
+        <div id="event-editor-overlay" class="modal-overlay">
+            <div class="modal-window wide"> <!-- ★ wideクラスを追加して、モーダルを広くする -->
+                <div class="modal-header">
+                    <h3 id="event-editor-title">イベント編集</h3>
+                    <button id="event-editor-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+                
+                <!-- ▼▼▼ ここからが、新しく追加・変更する部分です ▼▼▼ -->
+                <div id="event-editor-main-content" class="modal-content">
+                    
+                    <!-- (左側) 追加できるノードのリストなどを置くツールバー -->
+                    <div id="vsl-toolbar">
+                         <div id="vsl-trigger-editor">
+                            <h4>トリガー</h4>
+                            <select id="vsl-trigger-select"></select>
+                            <div id="vsl-trigger-context">
+                                <!-- 状況に応じて、JSがここに入力欄を追加します -->
+                            </div>
+                        </div>
+                        <hr>
+                      <div id="vsl-tabs-container">
+                            <h4>イベントグラフ</h4>
+                            <div id="vsl-tabs">
+                                <!-- タブボタンはJSでここに追加されます -->
+                            </div>
+                        </div>
+                        <hr>
+                        <h4>ノードを追加</h4>
+                        <div id="vsl-node-list">
+                            <!-- この中身はJavaScriptで動的に生成されます -->
+                        </div>
+                    </div>
+
+                    <!-- (右側) ノードを配置する広大なキャンバス -->
+                    <div id="vsl-canvas-wrapper">
+                        <div id="vsl-canvas">
+                             <svg id="vsl-svg-layer" width="2000" height="2000"></svg>
+                            <!-- ノードはJavaScriptでここに追加されます -->
+                        </div>
+                    </div>
+
+                </div>
+                <!-- ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ -->
+            </div>
+        </div>
+     <!-- in index.html -->
+
+<!-- ================================================================= -->
+<!-- ▼▼▼ ステートマシン・エディタ (完全分離版) ▼▼▼ -->
+<!-- ================================================================= -->
+<div id="sm-editor-overlay" class="modal-overlay">
+    <div class="modal-window" style="width: 95vw; height: 90vh; max-width: none;">
+        <div class="modal-header">
+            <h3 id="sm-editor-title">ステートマシン編集</h3>
+            <button id="sm-editor-close-btn" class="modal-close-btn">&times;</button>
+        </div>
+        <div class="modal-content" id="sm-editor-body">
+            
+            <!-- ====== 左ペイン: 状態リスト ====== -->
+            <div id="sm-states-panel">
+                <div class="panel-header">
+                    <h4>States</h4>
+                    <!-- ★★★「状態を追加」ボタンを追加 ★★★ -->
+                    <button id="sm-add-state-btn" title="新しい状態を追加">+</button>
+                </div>
+                <!-- ★★★ 状態リストが表示されるコンテナ ★★★ -->
+                <div id="sm-states-list">
+                    <!-- (ここにはJavaScriptによって .sm-state-item が動的に追加されます) -->
+                </div>
+            </div>
+
+            <!-- ====== 右ペイン: VSL編集エリア ====== -->
+            <!-- ====== 右ペイン: VSL編集エリア ====== -->
+<div id="sm-vsl-panel">
+    <div id="sm-hooks-tabs">
+        <!-- (ここにはJavaScriptによってタブが動的に追加されます) -->
+    </div>
+
+    <!-- ★★★ VSLエディタのコンテナ構造を、イベントエディタのものと合わせる ★★★ -->
+    <div class="sm-vsl-editor-container">
+        
+        <!-- 左側: ノードを追加するツールバー -->
+        <div class="sm-vsl-toolbar">
+            <h4>ノードリスト</h4>
+            <div class="sm-vsl-node-list">
+                <!-- (populateVslToolbarによってノードボタンが追加されます) -->
+            </div>
+        </div>
+        
+        <!-- 右側: ノードを配置するキャンバス -->
+        <div class="sm-vsl-canvas-wrapper">
+            <div class="sm-vsl-canvas">
+                <!-- (populateVslCanvasによってノードが追加されます) -->
+            </div>
+        </div>
+
+    </div>
+</div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<!-- ================================================================= -->
+<!-- ▲▲▲ ステートマシン・エディタ (ここまで) ▲▲▲ -->
+<!-- ================================================================= -->
+        <!-- Help Modal -->
+        <div id="help-modal-overlay" class="modal-overlay">
+            <div class="modal-window">
+                <div class="modal-header">
+                    <h3 id="help-modal-title">Odyssey Engine Help</h3>
+                    <button id="help-modal-close-btn" class="modal-close-btn">&times;</button>
+                </div>
+                <div id="help-modal-content" class="modal-content"></div>
+            </div>
+        </div>
+
+    </div> <!-- /#editor-root -->
+
+
+    <!-- ====================================================================== -->
+    <!--  3. JavaScript Entry Point                                             -->
+    <!-- ====================================================================== -->
+    <script type="module" src="src/main.js"></script>
+
+</body>
+
+</html>
+

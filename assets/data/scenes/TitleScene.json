@@ -1,0 +1,87 @@
+{
+  "scene_settings": {
+    "backgroundColor": "0x4488cc"
+  },
+  "hasJoystick": false,
+  "layers": [
+    {
+      "name": "Foreground",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Gameplay",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Background",
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "objects": [
+    {
+      "name": "title_1760055209022",
+      "type": "Image",
+      "x": 672,
+      "y": 386,
+      "depth": 0,
+      "scaleX": 1.39,
+      "scaleY": 1.39,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "events": [
+        {
+          "id": "event_1760055254612",
+          "trigger": "onClick",
+          "nodes": [
+            {
+              "id": "node_1760055261835",
+              "type": "fire_game_flow_event",
+              "params": {
+                "data": "{}",
+                "event": "START_GAME"
+              },
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        },
+        {
+          "id": "event_1760066227350",
+          "trigger": "onReady",
+          "nodes": [
+            {
+              "id": "node_1760066269099",
+              "type": "camera_fade",
+              "params": {
+                "type": "in",
+                "time": 1000,
+                "color": "0x000000"
+              },
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "components": [
+        {
+          "type": "FlashEffect",
+          "params": {
+            "texture": "title"
+          }
+        }
+      ],
+      "texture": "title",
+      "data": {
+        "lastTap": 1760066220019
+      }
+    }
+  ],
+  "animations": []
+}

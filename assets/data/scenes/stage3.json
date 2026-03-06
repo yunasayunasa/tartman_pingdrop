@@ -1,0 +1,1919 @@
+{
+  "scene_settings": {
+    "backgroundColor": "0x4488cc"
+  },
+  "hasJoystick": true,
+  "layers": [
+    {
+      "name": "Foreground",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Gameplay",
+      "visible": true,
+      "locked": false
+    },
+    {
+      "name": "Background",
+      "visible": true,
+      "locked": false
+    }
+  ],
+  "objects": [
+    {
+      "name": "test_a",
+      "type": "Image",
+      "x": 1494,
+      "y": 556,
+      "depth": 0,
+      "scaleX": 0.49,
+      "scaleY": 0.49,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Foreground",
+      "group": "interactable",
+      "events": [
+        {
+          "id": "event_1760152107279",
+          "trigger": "onInteract",
+          "nodes": [
+            {
+              "id": "node_1760152113498",
+              "type": "toggle_hiding",
+              "params": {},
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "taru",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "nextWaypoint": "test_b",
+        "isYSortable": true,
+        "lastTap": 0,
+        "overlap_anila": true,
+        "collision_category": 1,
+        "collision_mask": 4294967295,
+        "overlap_rulia_monster_1760153504781": false
+      }
+    },
+    {
+      "name": "test_b",
+      "type": "Image",
+      "x": 1997,
+      "y": 642,
+      "depth": 6,
+      "scaleX": 0.35,
+      "scaleY": 0.35,
+      "angle": 0,
+      "alpha": 1,
+      "group": "interactable",
+      "events": [
+        {
+          "id": "event_1759238991973",
+          "trigger": "onInteract",
+          "nodes": [
+            {
+              "id": "node_1759277863246",
+              "type": "toggle_hiding",
+              "params": {},
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "taru",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "nextWaypoint": "test_c",
+        "isYSortable": true,
+        "lastTap": 0,
+        "overlap_tartman": false,
+        "overlap_player": false,
+        "collision_category": 1,
+        "collision_mask": 4294967295,
+        "overlap_anila": true
+      }
+    },
+    {
+      "name": "bgtest3_1758338618267",
+      "type": "Image",
+      "x": 640,
+      "y": 360,
+      "depth": 20,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 0,
+      "layer": "Gameplay",
+      "events": [
+        {
+          "id": "event_1758338736052",
+          "trigger": "onReady",
+          "nodes": [
+            {
+              "id": "node_1758338741992",
+              "type": "tween",
+              "params": {
+                "to": "0.8"
+              },
+              "x": 50,
+              "y": 150
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "__MISSING",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "tartman_run_1758964419196",
+      "type": "Image",
+      "x": 617,
+      "y": 1167,
+      "depth": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "events": [],
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "anila_walk_1758964517325",
+      "type": "Image",
+      "x": 850,
+      "y": 1296,
+      "depth": 1296,
+      "scaleX": 0.38,
+      "scaleY": 0.38,
+      "angle": 0,
+      "alpha": 1,
+      "events": [],
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "player",
+      "type": "Sprite",
+      "x": 725,
+      "y": 625,
+      "depth": 625,
+      "scaleX": 0.65,
+      "scaleY": 0.65,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "player",
+      "events": [
+        {
+          "id": "event_1759315288106",
+          "trigger": "onReady",
+          "nodes": [
+            {}
+          ],
+          "connections": []
+        },
+        {
+          "id": "event_1759649855081",
+          "trigger": "onCollide_Start",
+          "nodes": [
+            {
+              "id": "node_1759659886405",
+              "type": "load_game",
+              "params": {
+                "slot": "checkpoint"
+              },
+              "x": 50,
+              "y": 50
+            },
+            {
+              "id": "node_1759757955280",
+              "type": "camera_fade",
+              "params": {
+                "type": "out",
+                "time": 100,
+                "color": "0xFF0000"
+              },
+              "x": 50,
+              "y": 220
+            },
+            {
+              "id": "node_1760165291690",
+              "type": "play_sound",
+              "params": {
+                "key": "blood",
+                "volume": 1,
+                "loop": "false"
+              },
+              "x": 50,
+              "y": 390
+            }
+          ],
+          "connections": [
+            {
+              "fromNode": "node_1759757955280",
+              "fromPin": "output",
+              "toNode": "node_1759659886405",
+              "toPin": "input"
+            },
+            {
+              "fromNode": "node_1760165291690",
+              "fromPin": "output",
+              "toNode": "node_1759757955280",
+              "toPin": "input"
+            }
+          ],
+          "targetGroup": "enemy"
+        },
+        {
+          "id": "event_1759651203732",
+          "trigger": "onOverlap_Start",
+          "nodes": [
+            {
+              "id": "node_1759651217413",
+              "type": "save_game",
+              "params": {
+                "slot": "checkpoint"
+              },
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": [],
+          "targetGroup": "checkpoint"
+        }
+      ],
+      "components": [
+        {
+          "type": "PlayerController",
+          "params": {
+            "walkSoundKey": "walk",
+            "jumpSoundKey": "smash",
+            "moveSpeed": 6
+          }
+        },
+        {
+          "type": "Scrollable",
+          "params": {
+            "speed": 11
+          }
+        },
+        {
+          "type": "Interactor",
+          "params": {
+            "radius": 200,
+            "iconColor": "0x1db427"
+          }
+        },
+        {
+          "type": "AnimationController",
+          "params": {}
+        }
+      ],
+      "anim_prefix": "tartman",
+      "texture": "tartman_run",
+      "physics": {
+        "isStatic": false,
+        "isSensor": false,
+        "fixedRotation": true,
+        "gravityScale": 1,
+        "friction": 0.1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 2,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "isYSortable": true,
+        "overlap_test_b": false,
+        "collision_category": 2,
+        "collision_mask": 4294967295,
+        "overlap_checkpoint": false,
+        "overlap_next_arrow_1759845615890": false,
+        "overlap_yuna_angry_1759846628757": false,
+        "overlap_maptile_wood_1760006466695": true,
+        "overlap_hasira_bottom_1760150486519": true,
+        "overlap_t": true,
+        "overlap_te": true,
+        "overlap_tes": true,
+        "overlap_test": true,
+        "overlap_test_": true,
+        "overlap_test_c": false,
+        "overlap_chest_1760150951390": false
+      }
+    },
+    {
+      "name": "anila",
+      "type": "Sprite",
+      "x": 1904,
+      "y": 609,
+      "depth": 609,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "enemy",
+      "events": [],
+      "components": [
+        {
+          "type": "NpcController",
+          "params": {
+            "moveSpeed": 12.5
+          }
+        },
+        {
+          "type": "AnimationController",
+          "params": {}
+        },
+        {
+          "type": "ChaseComponent",
+          "params": {
+            "detectionType": "vision",
+            "visionAngle": 60,
+            "detectionRadius": 500,
+            "chaseSpeed": 10
+          }
+        },
+        {
+          "type": "ReturnHomeComponent",
+          "params": {}
+        },
+        {
+          "type": "PatrolComponent",
+          "params": {
+            "waitTime": 3000,
+            "arrivalThreshold": 100,
+            "startWaypoint": "test_b",
+            "is8Way": false
+          }
+        },
+        {
+          "type": "DetectionAreaComponent",
+          "params": {
+            "type": "cone",
+            "radius": 440,
+            "offsetX": 142
+          }
+        }
+      ],
+      "anim_prefix": "gran",
+      "texture": "gran_walk",
+      "physics": {
+        "isStatic": false,
+        "isSensor": false,
+        "fixedRotation": true,
+        "gravityScale": 1,
+        "friction": 0,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 4,
+          "mask": 507
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "isYSortable": true,
+        "nextWaypoint": "test_a",
+        "overlap_test_b": true,
+        "dragStartX": 1927.9999999999998,
+        "dragStartY": 609.0911424572828,
+        "collision_category": 4,
+        "collision_mask": 507,
+        "overlap_test_a": false,
+        "overlap_test_c": false,
+        "overlap_test_e": false
+      }
+    },
+    {
+      "name": "checkpoint",
+      "type": "Image",
+      "x": 1009,
+      "y": 651,
+      "depth": 0,
+      "scaleX": 0.46,
+      "scaleY": 0.46,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "checkpoint",
+      "events": [],
+      "texture": "clear_obj",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "collision_category": 1,
+        "collision_mask": 4294967295,
+        "overlap_player": false,
+        "overlap_yuna_angry_1759846628757": true,
+        "overlap_rulia_monster_1760153504781": false
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_0_0",
+      "type": "Image",
+      "x": 165,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 239.90253411306014,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_0_1",
+      "type": "Image",
+      "x": 165,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 239.90253411306014,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_0_2",
+      "type": "Image",
+      "x": 165,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 239.90253411306014,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_1_0",
+      "type": "Image",
+      "x": 545,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 619.9025341130601,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_1_1",
+      "type": "Image",
+      "x": 545,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 619.9025341130601,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_1_2",
+      "type": "Image",
+      "x": 545,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 619.9025341130601,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_2_0",
+      "type": "Image",
+      "x": 925,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 999.9025341130601,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_2_1",
+      "type": "Image",
+      "x": 925,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 999.9025341130601,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_2_2",
+      "type": "Image",
+      "x": 925,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 999.9025341130601,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_3_0",
+      "type": "Image",
+      "x": 1305,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1379.9025341130598,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_3_1",
+      "type": "Image",
+      "x": 1305,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1379.9025341130598,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_3_2",
+      "type": "Image",
+      "x": 1305,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1379.9025341130598,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_4_0",
+      "type": "Image",
+      "x": 1685,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1759.9025341130598,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_4_1",
+      "type": "Image",
+      "x": 1685,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1759.9025341130598,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_4_2",
+      "type": "Image",
+      "x": 1685,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 1759.9025341130598,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_5_0",
+      "type": "Image",
+      "x": 2065,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2139.9025341130605,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_5_1",
+      "type": "Image",
+      "x": 2065,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2139.9025341130605,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_5_2",
+      "type": "Image",
+      "x": 2065,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2139.9025341130605,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_6_0",
+      "type": "Image",
+      "x": 2445,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2519.9025341130605,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_6_1",
+      "type": "Image",
+      "x": 2445,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2519.9025341130605,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_6_2",
+      "type": "Image",
+      "x": 2445,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2519.9025341130605,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_7_0",
+      "type": "Image",
+      "x": 2825,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2899.9025341130605,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_7_1",
+      "type": "Image",
+      "x": 2825,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2899.9025341130605,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_7_2",
+      "type": "Image",
+      "x": 2825,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 2899.9025341130605,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_8_0",
+      "type": "Image",
+      "x": 3205,
+      "y": 153,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 3279.9025341130605,
+        "dragStartY": 152.5730994152046
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_8_1",
+      "type": "Image",
+      "x": 3205,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 3279.9025341130605,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_8_2",
+      "type": "Image",
+      "x": 3205,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 3279.9025341130605,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_1",
+      "type": "Image",
+      "x": 3585,
+      "y": 533,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 3659.9025341130605,
+        "dragStartY": 532.5730994152045
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_2",
+      "type": "Image",
+      "x": 3585,
+      "y": 913,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_9bd1296a-3493-4503-b630-a31b073d2296",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0,
+        "dragStartX": 3659.9025341130605,
+        "dragStartY": 912.5730994152045
+      }
+    },
+    {
+      "name": "taimatsu_on_1759937289592",
+      "type": "Image",
+      "x": 220,
+      "y": 271,
+      "depth": 0,
+      "scaleX": 0.1,
+      "scaleY": 0.1,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "components": [
+        {
+          "type": "LightComponent",
+          "params": {
+            "radius": 430,
+            "intensity": 0.17
+          }
+        },
+        {
+          "type": "VignetteComponent",
+          "params": {}
+        },
+        {
+          "type": "FogComponent",
+          "params": {}
+        }
+      ],
+      "texture": "taimatsu_on",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_0",
+      "type": "Image",
+      "x": 3579,
+      "y": 159,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_4969dc9a-64cd-4260-94b9-57e9e24b0439",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_1",
+      "type": "Image",
+      "x": 3947,
+      "y": 158,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_4969dc9a-64cd-4260-94b9-57e9e24b0439",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_2_9_1",
+      "type": "Image",
+      "x": 3959,
+      "y": 539,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_d8a7ee6c-4f3d-4488-a8a5-5f192f88f3bb",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_2_9_2",
+      "type": "Image",
+      "x": 3953,
+      "y": 919,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_d8a7ee6c-4f3d-4488-a8a5-5f192f88f3bb",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_2_10_1",
+      "type": "Image",
+      "x": 4302,
+      "y": 514,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_d8a7ee6c-4f3d-4488-a8a5-5f192f88f3bb",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "maptile_wood_1759937102294_9_0_9_2_10_2",
+      "type": "Image",
+      "x": 4302,
+      "y": 195,
+      "depth": -2,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "group": "fill_group_d8a7ee6c-4f3d-4488-a8a5-5f192f88f3bb",
+      "events": [],
+      "texture": "maptile_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "taimatsu_1759995219231",
+      "type": "Image",
+      "x": 1991,
+      "y": 278,
+      "depth": 0,
+      "scaleX": 0.1,
+      "scaleY": 0.1,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "components": [
+        {
+          "type": "LightComponent",
+          "params": {
+            "radius": 340,
+            "intensity": 0.1
+          }
+        }
+      ],
+      "texture": "taimatsu_on",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "taimatsu_1759995272887",
+      "type": "Image",
+      "x": 3458,
+      "y": 247,
+      "depth": 0,
+      "scaleX": 0.1,
+      "scaleY": 0.1,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "components": [
+        {
+          "type": "LightComponent",
+          "params": {
+            "radius": 340,
+            "intensity": 0.1
+          }
+        }
+      ],
+      "texture": "taimatsu_on",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "mado_wood_1759995424711",
+      "type": "Image",
+      "x": 632,
+      "y": 285,
+      "depth": 0,
+      "scaleX": 0.22,
+      "scaleY": 0.22,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "mado_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "mado_wood_1759995456383",
+      "type": "Image",
+      "x": 1748,
+      "y": 285,
+      "depth": 0,
+      "scaleX": 0.22,
+      "scaleY": 0.22,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "mado_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "mado_wood_1759995485127",
+      "type": "Image",
+      "x": 2569,
+      "y": 287,
+      "depth": 0,
+      "scaleX": 0.25,
+      "scaleY": 0.25,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "mado_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "mado_wood_1759995503583",
+      "type": "Image",
+      "x": 3196,
+      "y": 291,
+      "depth": 0,
+      "scaleX": 0.25,
+      "scaleY": 0.25,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "mado_wood",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "test_c",
+      "type": "Image",
+      "x": 2562,
+      "y": 667,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "interactable",
+      "events": [
+        {
+          "id": "event_1760150727619",
+          "trigger": "onInteract",
+          "nodes": [
+            {
+              "id": "node_1760150745622",
+              "type": "toggle_hiding",
+              "params": {},
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "hasira_bottom",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "overlap_player": false,
+        "nextWaypoint": "test_d",
+        "collision_category": 1,
+        "collision_mask": 4294967295,
+        "overlap_anila": true
+      }
+    },
+    {
+      "name": "hasira_center_1760150511494",
+      "type": "Image",
+      "x": 2563,
+      "y": 582,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150547497",
+      "type": "Image",
+      "x": 2562,
+      "y": 497,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150566498",
+      "type": "Image",
+      "x": 2562,
+      "y": 412,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150580601",
+      "type": "Image",
+      "x": 2562,
+      "y": 330,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150595586",
+      "type": "Image",
+      "x": 2562,
+      "y": 244,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150607332",
+      "type": "Image",
+      "x": 2560,
+      "y": 170,
+      "depth": 0,
+      "scaleX": 0.13,
+      "scaleY": 0.13,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150624994",
+      "type": "Image",
+      "x": 2559,
+      "y": 93,
+      "depth": 0,
+      "scaleX": 0.16,
+      "scaleY": 0.16,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "hasira_center_1760150643514",
+      "type": "Image",
+      "x": 2555,
+      "y": 12,
+      "depth": 0,
+      "scaleX": 0.13,
+      "scaleY": 0.13,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Background",
+      "events": [],
+      "texture": "hasira_center",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "next_arrow_1760150799410",
+      "type": "Image",
+      "x": 3592,
+      "y": 402,
+      "depth": 0,
+      "scaleX": 1,
+      "scaleY": 1,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "events": [],
+      "texture": "next_arrow",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "test_d",
+      "type": "Image",
+      "x": 3436,
+      "y": 676,
+      "depth": 0,
+      "scaleX": 0.18,
+      "scaleY": 0.18,
+      "angle": -89,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "interactable",
+      "events": [
+        {
+          "id": "event_1760152268522",
+          "trigger": "onInteract",
+          "nodes": [
+            {
+              "id": "node_1760152271919",
+              "type": "toggle_hiding",
+              "params": {},
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "taru",
+      "data": {
+        "lastTap": 0,
+        "nextWaypoint": "test_e"
+      }
+    },
+    {
+      "name": "taru_1760150917070",
+      "type": "Image",
+      "x": 3363,
+      "y": 659,
+      "depth": 0,
+      "scaleX": 0.18,
+      "scaleY": 0.18,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "events": [],
+      "texture": "taru",
+      "data": {
+        "lastTap": 0
+      }
+    },
+    {
+      "name": "test_e",
+      "type": "Image",
+      "x": 3154,
+      "y": 593,
+      "depth": 0,
+      "scaleX": 0.49,
+      "scaleY": 0.49,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "rest_e",
+      "events": [
+        {
+          "id": "event_1760151060303",
+          "trigger": "onInteract",
+          "nodes": [
+            {
+              "id": "node_1760151068058",
+              "type": "toggle_hiding",
+              "params": {},
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": []
+        }
+      ],
+      "texture": "chest",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": true,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "overlap_player": false,
+        "nextWaypoint": "test_a",
+        "collision_category": 1,
+        "collision_mask": 4294967295,
+        "overlap_anila": false
+      }
+    },
+    {
+      "name": "anila",
+      "type": "Sprite",
+      "x": 2028,
+      "y": 609,
+      "depth": 609,
+      "scaleX": 0.76,
+      "scaleY": 0.76,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "enemy",
+      "events": [],
+      "components": [
+        {
+          "type": "NpcController",
+          "params": {
+            "moveSpeed": 20.5
+          }
+        },
+        {
+          "type": "AnimationController",
+          "params": {}
+        },
+        {
+          "type": "ChaseComponent",
+          "params": {
+            "detectionType": "vision",
+            "visionAngle": 60,
+            "detectionRadius": 300,
+            "chaseSpeed": 5
+          }
+        },
+        {
+          "type": "ReturnHomeComponent",
+          "params": {}
+        },
+        {
+          "type": "DetectionAreaComponent",
+          "params": {
+            "type": "cone",
+            "radius": 370,
+            "offsetX": 142
+          }
+        },
+        {
+          "type": "WanderComponent",
+          "params": {
+            "waitDuration": 900,
+            "walkDuration": 5600
+          }
+        }
+      ],
+      "anim_prefix": "anila",
+      "texture": "anila_walk",
+      "physics": {
+        "isStatic": false,
+        "isSensor": false,
+        "fixedRotation": true,
+        "gravityScale": 1,
+        "friction": 0.1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 4,
+          "mask": 507
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "isYSortable": true,
+        "nextWaypoint": "test_a",
+        "overlap_test_b": true,
+        "dragStartX": 1927.9999999999998,
+        "dragStartY": 609.0911424572828,
+        "collision_category": 4,
+        "collision_mask": 507,
+        "overlap_clear_obj_1760107568696": false,
+        "overlap_checkpoint": false,
+        "overlap_test_c": true,
+        "overlap_test_e": false,
+        "overlap_clear_obj_1760152421830": false,
+        "overlap_test_a": true
+      }
+    },
+    {
+      "name": "rulia_monster_1760153504781",
+      "type": "Image",
+      "x": 274,
+      "y": 476,
+      "depth": 0,
+      "scaleX": 1.67,
+      "scaleY": 1.67,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "enemy",
+      "events": [],
+      "components": [
+        {
+          "type": "NpcController",
+          "params": {
+            "moveSpeed": 1
+          }
+        },
+        {
+          "type": "PatrolComponent",
+          "params": {
+            "startWaypoint": "test_d"
+          }
+        }
+      ],
+      "texture": "rulia_monster",
+      "physics": {
+        "isStatic": false,
+        "isSensor": false,
+        "fixedRotation": true,
+        "gravityScale": 1,
+        "friction": 0,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 4,
+          "mask": 1019
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "overlap_yuna_angry_1759846628757": false,
+        "overlap_checkpoint": false,
+        "overlap_test_a": false,
+        "collision_mask": 1019,
+        "collision_category": 4
+      }
+    },
+    {
+      "name": "taimatsu_on_1760155234499",
+      "type": "Image",
+      "x": 3729,
+      "y": 589,
+      "depth": 0,
+      "scaleX": 0.13,
+      "scaleY": 0.13,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "events": [
+        {
+          "id": "event_1760155280085",
+          "trigger": "onOverlap_Start",
+          "nodes": [
+            {
+              "id": "node_1760155295743",
+              "type": "return_novel",
+              "params": {
+                "params": ""
+              },
+              "x": 50,
+              "y": 50
+            }
+          ],
+          "connections": [],
+          "targetGroup": "player"
+        }
+      ],
+      "texture": "taimatsu_on",
+      "physics": {
+        "isStatic": true,
+        "isSensor": true,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 4294967295
+        }
+      },
+      "data": {
+        "lastTap": 0,
+        "overlap_clear_obj_1760152421830": false,
+        "collision_category": 1,
+        "collision_mask": 4294967295
+      }
+    },
+    {
+      "name": "next_arrow_1760157261448",
+      "type": "Image",
+      "x": 658,
+      "y": 516,
+      "depth": 0,
+      "scaleX": 0.27,
+      "scaleY": 0.27,
+      "angle": 0,
+      "alpha": 1,
+      "layer": "Gameplay",
+      "group": "HIDDEN",
+      "events": [
+        {
+          "id": "event_1760157291453",
+          "trigger": "onCollide_Start",
+          "nodes": [
+            {
+              "id": "node_1760157304584",
+              "type": "destroy",
+              "params": {
+                "target": "source"
+              },
+              "x": 50,
+              "y": 50
+            },
+            {
+              "id": "node_1760157315787",
+              "type": "run_scenario",
+              "params": {
+                "file": "scene2",
+                "block_input": true
+              },
+              "x": 50,
+              "y": 220
+            }
+          ],
+          "connections": [
+            {
+              "fromNode": "node_1760157304584",
+              "fromPin": "output",
+              "toNode": "node_1760157315787",
+              "toPin": "input"
+            }
+          ],
+          "targetGroup": "player"
+        }
+      ],
+      "texture": "next_arrow",
+      "physics": {
+        "isStatic": false,
+        "isSensor": false,
+        "fixedRotation": false,
+        "gravityScale": 1,
+        "friction": 0.1,
+        "restitution": 0,
+        "collisionFilter": {
+          "category": 1,
+          "mask": 1019
+        }
+      },
+      "data": {
+        "lastTap": 1761385424338,
+        "collision_category": 1,
+        "collision_mask": 1019
+      }
+    }
+  ],
+  "animations": [
+    {
+      "key": "anila_idle",
+      "texture": "anila_walk",
+      "frames": {
+        "start": 0,
+        "end": 0
+      },
+      "frameRate": 1,
+      "repeat": 0
+    },
+    {
+      "key": "tartman_idle",
+      "texture": "tartman_run",
+      "frames": {
+        "start": 0,
+        "end": 0
+      },
+      "frameRate": 10,
+      "repeat": -1
+    },
+    {
+      "key": "anila_walk_right",
+      "texture": "anila_walk",
+      "frames": {
+        "start": 0,
+        "end": 3
+      },
+      "frameRate": 10,
+      "repeat": -1
+    },
+    {
+      "key": "tartman_walk_right",
+      "texture": "tartman_run",
+      "frames": {
+        "start": 1,
+        "end": 4
+      },
+      "frameRate": 10,
+      "repeat": -1
+    },
+    {
+      "key": "gran_idle",
+      "texture": "gran_walk",
+      "frames": {
+        "start": 0,
+        "end": 0
+      },
+      "frameRate": 1,
+      "repeat": 0
+    },
+    {
+      "key": "gran_walk_right",
+      "texture": "gran_walk",
+      "frames": {
+        "start": 0,
+        "end": 3
+      },
+      "frameRate": 10,
+      "repeat": -1
+    }
+  ]
+}

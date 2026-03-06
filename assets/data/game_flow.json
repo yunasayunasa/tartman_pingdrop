@@ -1,0 +1,125 @@
+{
+  "initialState": "Title",
+  "states": {
+    "Title": {
+      "onEnter": [
+        {
+          "type": "transitionTo",
+          "params": {
+            "scene": "TitleScene"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "event": "START_GAME",
+          "to": "InGame",
+          "action": {
+            "type": "transitionTo",
+            "params": {
+              "scene": "GameScene",
+              "scenario": "test"
+            }
+          }
+        }
+      ]
+    },
+    "InGame": {
+      "onEnter": [
+        {
+          "type": "resumeScene"
+        }
+      ],
+      "transitions": [
+        {
+          "event": "OPEN_PAUSE_MENU",
+          "to": "Paused"
+        },
+        {
+          "event": "RUN_NOVEL_OVERLAY",
+          "to": "NovelOverlay"
+        }
+      ]
+    },
+    "Paused": {
+      "onEnter": [
+        {
+          "type": "pauseScene"
+        },
+        {
+          "type": "openMenuOverlay",
+          "params": {
+            "layout": "pause_menu"
+          }
+        }
+      ],
+      "onExit": [],
+      "transitions": [
+        {
+          "event": "CLOSE_PAUSE_MENU",
+          "to": "InGame",
+          "action": {
+            "type": "closeOverlay"
+          }
+        }
+      ]
+    },
+    "NovelOverlay": {
+      "onEnter": [
+        {
+          "type": "pauseScene"
+        },
+        {
+          "type": "runNovelOverlay"
+        }
+      ],
+      "onExit": [],
+      "transitions": [
+        {
+          "event": "END_NOVEL_OVERLAY",
+          "to": "InGame",
+          "action": {
+            "type": "closeOverlay"
+          }
+        }
+      ]
+    },
+    "Trial": {
+      "onEnter": [
+        {
+          "type": "resumeScene"
+        }
+      ],
+      "transitions": [
+        {
+          "event": "GAME_OVER",
+          "to": "GameOver"
+        },
+        {
+          "event": "TRIAL_CLEAR",
+          "to": "InGame"
+        }
+      ]
+    },
+    "GameOver": {
+      "onEnter": [
+        {
+          "type": "transitionTo",
+          "params": {
+            "scene": "GameOverScene"
+          }
+        }
+      ],
+      "transitions": [
+        {
+          "event": "RESTART_GAME",
+          "to": "InGame"
+        },
+        {
+          "event": "RETURN_TO_TITLE",
+          "to": "Title"
+        }
+      ]
+    }
+  }
+}
