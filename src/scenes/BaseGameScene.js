@@ -916,38 +916,50 @@ export default class BaseGameScene extends Phaser.Scene {
 
         // --- 衝突イベント監視 ---
         this.matter.world.on('collisionstart', (event) => {
+            if (!event || !event.pairs) return;
             for (const pair of event.pairs) {
-                // ▼▼▼【ここに不足していた変数宣言を追加】▼▼▼
+                if (!pair || !pair.bodyA || !pair.bodyB) continue;
+
                 const objA = pair.bodyA.gameObject;
                 const objB = pair.bodyB.gameObject;
 
-                if (objA && objB) {
+                // 両方のオブジェクトが存在し、かつ破棄されていない場合のみ処理
+                if (objA && objB && objA.active && objB.active) {
                     this.handleCollision(objA, objB, pair);
-                    this.handleCollision(objB, objA, pair);
+                    // 1つ目のコールでobjA/objBが破棄された可能性も考慮
+                    if (objA.active && objB.active) {
+                        this.handleCollision(objB, objA, pair);
+                    }
                 }
-                // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
             }
         });
 
-        // --- オーバーラップイベント監視 (ここは変更なし) ---
+        // --- オーバーラップイベント監視 ---
         this.matter.world.on('collisionactive', (event) => {
+            if (!event || !event.pairs) return;
             for (const pair of event.pairs) {
+                if (!pair || !pair.bodyA || !pair.bodyB) continue;
                 if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
                     const objA = pair.bodyA.gameObject;
                     const objB = pair.bodyB.gameObject;
-                    if (objA && objB) {
+                    if (objA && objB && objA.active && objB.active) {
                         this.handleOverlap(objA, objB, 'active');
-                        this.handleOverlap(objB, objA, 'active');
+                        if (objA.active && objB.active) {
+                            this.handleOverlap(objB, objA, 'active');
+                        }
                     }
                 }
             }
         });
 
         this.matter.world.on('collisionend', (event) => {
+            if (!event || !event.pairs) return;
             for (const pair of event.pairs) {
+                if (!pair || !pair.bodyA || !pair.bodyB) continue;
                 if (pair.bodyA.isSensor || pair.bodyB.isSensor) {
                     const objA = pair.bodyA.gameObject;
                     const objB = pair.bodyB.gameObject;
+                    // Endの場合は破棄されている可能性が高いが、チェックは行う
                     if (objA && objB) {
                         this.handleOverlap(objA, objB, 'end');
                         this.handleOverlap(objB, objA, 'end');
@@ -1009,6 +1021,8 @@ export default class BaseGameScene extends Phaser.Scene {
    */
 
     handleCollision(sourceObject, targetObject, pair) {
+        if (!sourceObject || !targetObject || !sourceObject.active || !targetObject.active) return;
+
         const actionInterpreter = this.registry.get('actionInterpreter');
         if (!actionInterpreter || !sourceObject.getData) return;
 
@@ -1130,19 +1144,8 @@ export default class BaseGameScene extends Phaser.Scene {
 
 
     handleKeyPressEvents() {
-        const actionInterpreter = this.registry.get('actionInterpreter');
-        if (!actionInterpreter || !sourceObject.getData) return;
-
-        const events = sourceObject.getData('events');
-        if (!events) return;
-        for (const [key, events] of this.keyPressEvents.entries()) {
-            const keyObject = this.input.keyboard.addKey(key);
-            if (Phaser.Input.Keyboard.JustDown(keyObject)) {
-                events.forEach(event => {
-                    if (actionInterpreter) this.actionInterpreter.run(sourceObject, eventData, targetObject);
-                });
-            }
-        }
+        // ※ このメソッドは現在、具体的なsourceObjectの指定がないため暫定的な実装です。
+        // ※ 必要に応じて、PlayerControllerなどのコンポーネント側でキー入力を処理することを推奨します。
     }
 
 

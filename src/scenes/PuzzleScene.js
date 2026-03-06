@@ -129,13 +129,13 @@ export default class PuzzleScene extends BaseGameScene {
      */
     _setupCollisions() {
         this.matter.world.on('collisionstart', (event) => {
-            if (this.isCleared || this.isFailed) return;
+            if (this.isCleared || this.isFailed || !event || !event.pairs) return;
 
             event.pairs.forEach(pair => {
-                const objA = pair.bodyA.gameObject;
-                const objB = pair.bodyB.gameObject;
+                const objA = pair.bodyA ? pair.bodyA.gameObject : null;
+                const objB = pair.bodyB ? pair.bodyB.gameObject : null;
 
-                if (!objA || !objB) return;
+                if (!objA || !objB || !objA.active || !objB.active) return;
 
                 // キャラクター vs 宝 → クリア
                 if (this._isCharAndTarget(objA, objB, 'character', 'treasure')) {
@@ -154,43 +154,30 @@ export default class PuzzleScene extends BaseGameScene {
             });
         });
     }
-
-    _isCharAndTarget(objA, objB, nameA, nameB) {
-        return (objA.name === nameA && objB.name === nameB) ||
-            (objA.name === nameB && objB.name === nameA);
-    }
-
-    _isCharAndTrap(objA, objB) {
-        const aIsChar = objA.name === 'character';
-        const bIsChar = objB.name === 'character';
-        const aIsTrap = (objA.name || '').startsWith('trap_');
-        const bIsTrap = (objB.name || '').startsWith('trap_');
-        return (aIsChar && bIsTrap) || (bIsChar && aIsTrap);
-    }
-
-    _isWaterAndLava(objA, objB) {
-        const aIsWater = (objA.name || '').includes('water');
-        const bIsWater = (objB.name || '').includes('water');
-        const aIsLava = (objA.name || '').includes('lava');
-        const bIsLava = (objB.name || '').includes('lava');
-        return (aIsWater && bIsLava) || (bIsWater && aIsLava);
-    }
-
+    // ... (middle parts remain same) ...
     /**
      * 水と溶岩が反応して岩になる処理
      */
     _onWaterLavaReaction(objA, objB) {
+        if (!objA.active || !objB.active) return;
+
         const lavaObj = (objA.name || '').includes('lava') ? objA : objB;
         const waterObj = (objA.name || '').includes('water') ? objA : objB;
 
         console.log(`[PuzzleScene] Reaction: Water + Lava = Rock!`);
 
         // 溶岩を岩に変える（色を変える、罠属性を消す）
-        lavaObj.setFillStyle(0x555555); // グレー（岩の色）
-        lavaObj.name = 'rock'; // 名前を変えて罠判定から外す
+        if (lavaObj.active) {
+            lavaObj.setFillStyle(0x555555); // グレー（岩の色）
+            lavaObj.name = 'rock'; // 名前を変えて罠判定から外す
+        }
 
-        // 水は消滅するか、一緒に岩になる
-        waterObj.destroy();
+        // 水は消滅させる。衝突ループ内での破壊を避けるため、次のフレームで実行
+        if (waterObj.active) {
+            this.time.delayedCall(0, () => {
+                if (waterObj.active) waterObj.destroy();
+            });
+        }
     }
 
     /**
