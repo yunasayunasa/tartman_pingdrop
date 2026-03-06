@@ -297,6 +297,12 @@ export default class BaseGameScene extends Phaser.Scene {
         if (layout.type === 'Sprite') {
             return new Phaser.GameObjects.Sprite(this, 0, 0, textureKey);
         }
+        if (layout.type === 'Rectangle') {
+            return new Phaser.GameObjects.Rectangle(this, 0, 0, layout.width || 128, layout.height || 128, layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+        }
+        if (layout.type === 'Circle') {
+            return new Phaser.GameObjects.Circle(this, 0, 0, layout.radius || 64, layout.fillColor || 0xffffff, layout.fillAlpha ?? 1);
+        }
         // デフォルトはImage
         return new Phaser.GameObjects.Image(this, 0, 0, textureKey);
     }

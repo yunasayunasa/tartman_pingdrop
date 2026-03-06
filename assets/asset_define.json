@@ -98,7 +98,17 @@
         "JumpScene.json",
         "TitleScene.json",
         "pause_menu.json",
-        "trial_demo.json"
+        "trial_demo.json",
+        "PuzzleStage1.json",
+        "PuzzleStage2.json",
+        "PuzzleStage3.json",
+        "PuzzleStage4.json",
+        "PuzzleStage5.json",
+        "PuzzleStage6.json",
+        "PuzzleStage7.json",
+        "PuzzleStage8.json",
+        "PuzzleStage9.json",
+        "PuzzleStage10.json"
       ]
     },
     "//": "--- ここにタイルセット用の定義を追加 ---",
