@@ -38,7 +38,7 @@
             "name": "character",
             "type": "Rectangle",
             "x": 200,
-            "y": 80,
+            "y": 600,
             "width": 40,
             "height": 40,
             "fillColor": "0x3498db",
@@ -60,7 +60,7 @@
             "name": "treasure",
             "type": "Rectangle",
             "x": 1050,
-            "y": 650,
+            "y": 600,
             "width": 50,
             "height": 50,
             "fillColor": "0xf1c40f",
@@ -78,61 +78,42 @@
             "components": []
         },
         {
-            "name": "pin_1",
-            "type": "Rectangle",
-            "x": 200,
-            "y": 180,
-            "width": 12,
-            "height": 80,
-            "fillColor": "0xecf0f1",
-            "depth": 10,
-            "layer": "Gameplay",
-            "physics": {
-                "type": "rectangle",
-                "width": 12,
-                "height": 80,
-                "isStatic": true,
-                "label": "pin_1"
-            },
-            "events": [],
-            "components": []
-        },
-        {
-            "name": "pin_2",
+            "name": "platform_top_water",
             "type": "Rectangle",
             "x": 640,
-            "y": 400,
-            "width": 12,
-            "height": 80,
-            "fillColor": "0xecf0f1",
-            "depth": 10,
-            "layer": "Gameplay",
-            "physics": {
-                "type": "rectangle",
-                "width": 12,
-                "height": 80,
-                "isStatic": true,
-                "label": "pin_2"
-            },
-            "events": [],
-            "components": []
-        },
-        {
-            "name": "platform_1",
-            "type": "Rectangle",
-            "x": 200,
-            "y": 220,
-            "width": 200,
+            "y": 100,
+            "width": 150,
             "height": 20,
             "fillColor": "0x7f8c8d",
             "depth": 3,
             "layer": "Gameplay",
             "physics": {
                 "type": "rectangle",
-                "width": 200,
+                "width": 150,
                 "height": 20,
                 "isStatic": true,
-                "label": "platform_1"
+                "label": "platform_top_water"
+            },
+            "events": [],
+            "components": []
+        },
+        {
+            "name": "trap_water_1",
+            "type": "Rectangle",
+            "x": 640,
+            "y": 60,
+            "width": 80,
+            "height": 40,
+            "fillColor": "0x2980b9",
+            "depth": 4,
+            "layer": "Gameplay",
+            "physics": {
+                "type": "rectangle",
+                "width": 80,
+                "height": 40,
+                "isStatic": true,
+                "isSensor": true,
+                "label": "trap_water_1"
             },
             "data": {
                 "blockedBy": "pin_1"
@@ -141,18 +122,58 @@
             "components": []
         },
         {
+            "name": "pin_1",
+            "type": "Rectangle",
+            "x": 640,
+            "y": 150,
+            "width": 12,
+            "height": 100,
+            "fillColor": "0xecf0f1",
+            "depth": 10,
+            "layer": "Gameplay",
+            "physics": {
+                "type": "rectangle",
+                "width": 12,
+                "height": 100,
+                "isStatic": true,
+                "label": "pin_1"
+            },
+            "events": [],
+            "components": []
+        },
+        {
+            "name": "platform_mid_lava",
+            "type": "Rectangle",
+            "x": 640,
+            "y": 300,
+            "width": 150,
+            "height": 20,
+            "fillColor": "0x7f8c8d",
+            "depth": 3,
+            "layer": "Gameplay",
+            "physics": {
+                "type": "rectangle",
+                "width": 150,
+                "height": 20,
+                "isStatic": true,
+                "label": "platform_mid_lava"
+            },
+            "events": [],
+            "components": []
+        },
+        {
             "name": "trap_lava_1",
             "type": "Rectangle",
             "x": 640,
-            "y": 340,
-            "width": 120,
+            "y": 260,
+            "width": 80,
             "height": 40,
             "fillColor": "0xe74c3c",
             "depth": 4,
             "layer": "Gameplay",
             "physics": {
                 "type": "rectangle",
-                "width": 120,
+                "width": 80,
                 "height": 40,
                 "isStatic": true,
                 "isSensor": true,
@@ -165,82 +186,21 @@
             "components": []
         },
         {
-            "name": "slope_1",
+            "name": "pin_2",
             "type": "Rectangle",
-            "x": 420,
+            "x": 640,
             "y": 350,
-            "width": 300,
-            "height": 20,
-            "fillColor": "0x7f8c8d",
-            "depth": 3,
-            "layer": "Gameplay",
-            "angle": 20,
-            "physics": {
-                "type": "rectangle",
-                "width": 300,
-                "height": 20,
-                "isStatic": true,
-                "label": "slope_1"
-            },
-            "events": [],
-            "components": []
-        },
-        {
-            "name": "platform_bottom",
-            "type": "Rectangle",
-            "x": 900,
-            "y": 550,
-            "width": 400,
-            "height": 20,
-            "fillColor": "0x7f8c8d",
-            "depth": 3,
+            "width": 12,
+            "height": 100,
+            "fillColor": "0xecf0f1",
+            "depth": 10,
             "layer": "Gameplay",
             "physics": {
                 "type": "rectangle",
-                "width": 400,
-                "height": 20,
+                "width": 12,
+                "height": 100,
                 "isStatic": true,
-                "label": "platform_bottom"
-            },
-            "events": [],
-            "components": []
-        },
-        {
-            "name": "wall_left",
-            "type": "Rectangle",
-            "x": 0,
-            "y": 360,
-            "width": 20,
-            "height": 720,
-            "fillColor": "0x2c3e50",
-            "depth": 1,
-            "layer": "Background",
-            "physics": {
-                "type": "rectangle",
-                "width": 20,
-                "height": 720,
-                "isStatic": true,
-                "label": "wall"
-            },
-            "events": [],
-            "components": []
-        },
-        {
-            "name": "wall_right",
-            "type": "Rectangle",
-            "x": 1280,
-            "y": 360,
-            "width": 20,
-            "height": 720,
-            "fillColor": "0x2c3e50",
-            "depth": 1,
-            "layer": "Background",
-            "physics": {
-                "type": "rectangle",
-                "width": 20,
-                "height": 720,
-                "isStatic": true,
-                "label": "wall"
+                "label": "pin_2"
             },
             "events": [],
             "components": []
@@ -262,6 +222,19 @@
                 "isStatic": true,
                 "label": "floor"
             },
+            "events": [],
+            "components": []
+        },
+        {
+            "name": "pit",
+            "type": "Rectangle",
+            "x": 640,
+            "y": 680,
+            "width": 200,
+            "height": 40,
+            "fillColor": "0x1a2530",
+            "depth": 0,
+            "layer": "Background",
             "events": [],
             "components": []
         }

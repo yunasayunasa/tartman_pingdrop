@@ -81,40 +81,28 @@ export default class PuzzleScene extends BaseGameScene {
      * ピンを抜く処理
      */
     _pullPin(pinObj) {
-        console.log(`[PuzzleScene] Pulling pin: ${pinObj.name}`);
+        const pinName = pinObj.name;
+        console.log(`[PuzzleScene] Pulling pin: ${pinName}`);
 
         // ピンを抜くアニメーション（上方向にスライドして消える）
         this.tweens.add({
             targets: pinObj,
-            y: pinObj.y - 60,
+            y: pinObj.y - 120,
             alpha: 0,
-            duration: 300,
-            ease: 'Power2',
+            duration: 400,
+            ease: 'Cubic.easeIn',
             onComplete: () => {
-                // ピンの物理ボディを無効化
-                if (pinObj.body) {
-                    // Matter.js: ボディを削除
-                    this.matter.world.remove(pinObj.body);
-                }
-                // 不可視にして衝突しないようにする
-                pinObj.setVisible(false);
-                pinObj.setActive(false);
-                if (pinObj.input) {
-                    pinObj.removeInteractive();
-                }
-
                 // blockedByでこのピンに紐づけられた要素を解放
-                this._releaseBlockedObjects(pinObj.name);
+                this._releaseBlockedObjects(pinName);
+                // オブジェクトを破棄
+                pinObj.destroy();
             }
         });
 
         // SE再生
         const soundManager = this.registry.get('soundManager');
-        if (soundManager) {
-            // キャッシュに存在するか確認してから再生
-            if (this.cache.audio.exists('pin_pull')) {
-                soundManager.playSe('pin_pull');
-            }
+        if (soundManager && this.cache.audio.exists('pin_pull')) {
+            soundManager.playSe('pin_pull');
         }
     }
 
@@ -125,7 +113,7 @@ export default class PuzzleScene extends BaseGameScene {
         this.children.list.forEach(obj => {
             if (obj.getData && obj.getData('blockedBy') === pinName) {
                 console.log(`[PuzzleScene] Releasing object blocked by ${pinName}: ${obj.name}`);
-                // isStatic を false にして物理演算を有効化
+                // 物理演算を有効化
                 if (obj.setStatic) {
                     obj.setStatic(false);
                 }
@@ -144,10 +132,8 @@ export default class PuzzleScene extends BaseGameScene {
             if (this.isCleared || this.isFailed) return;
 
             event.pairs.forEach(pair => {
-                const bodyA = pair.bodyA;
-                const bodyB = pair.bodyB;
-                const objA = bodyA.gameObject;
-                const objB = bodyB.gameObject;
+                const objA = pair.bodyA.gameObject;
+                const objB = pair.bodyB.gameObject;
 
                 if (!objA || !objB) return;
 
@@ -159,6 +145,11 @@ export default class PuzzleScene extends BaseGameScene {
                 // キャラクター vs 罠 → 失敗
                 if (this._isCharAndTrap(objA, objB)) {
                     this._onStageFail();
+                }
+
+                // 水 vs 溶岩 → 岩に変化
+                if (this._isWaterAndLava(objA, objB)) {
+                    this._onWaterLavaReaction(objA, objB);
                 }
             });
         });
@@ -177,6 +168,31 @@ export default class PuzzleScene extends BaseGameScene {
         return (aIsChar && bIsTrap) || (bIsChar && aIsTrap);
     }
 
+    _isWaterAndLava(objA, objB) {
+        const aIsWater = (objA.name || '').includes('water');
+        const bIsWater = (objB.name || '').includes('water');
+        const aIsLava = (objA.name || '').includes('lava');
+        const bIsLava = (objB.name || '').includes('lava');
+        return (aIsWater && bIsLava) || (bIsWater && aIsLava);
+    }
+
+    /**
+     * 水と溶岩が反応して岩になる処理
+     */
+    _onWaterLavaReaction(objA, objB) {
+        const lavaObj = (objA.name || '').includes('lava') ? objA : objB;
+        const waterObj = (objA.name || '').includes('water') ? objA : objB;
+
+        console.log(`[PuzzleScene] Reaction: Water + Lava = Rock!`);
+
+        // 溶岩を岩に変える（色を変える、罠属性を消す）
+        lavaObj.setFillStyle(0x555555); // グレー（岩の色）
+        lavaObj.name = 'rock'; // 名前を変えて罠判定から外す
+
+        // 水は消滅するか、一緒に岩になる
+        waterObj.destroy();
+    }
+
     /**
      * ステージクリア処理
      */
@@ -185,8 +201,10 @@ export default class PuzzleScene extends BaseGameScene {
         this.isCleared = true;
         console.log(`[PuzzleScene] Stage ${this.currentStage} CLEARED!`);
 
-        // 物理演算を一時停止
-        this.matter.world.pause();
+        // 少し遅らせて物理を止める（イベントループ外で安全に）
+        this.time.delayedCall(10, () => {
+            if (this.matter.world) this.matter.world.pause();
+        });
 
         // クリア演出
         const clearText = this.add.text(
@@ -203,15 +221,14 @@ export default class PuzzleScene extends BaseGameScene {
             scaleY: 1.2,
             duration: 500,
             ease: 'Back.easeOut',
-            yoyo: true,
-            hold: 1000,
             onComplete: () => {
-                // 次のステージへ or ゲームクリア
-                if (this.currentStage < this.totalStages) {
-                    this._goToNextStage();
-                } else {
-                    this._onGameClear();
-                }
+                this.time.delayedCall(1500, () => {
+                    if (this.currentStage < this.totalStages) {
+                        this._goToNextStage();
+                    } else {
+                        this._onGameClear();
+                    }
+                });
             }
         });
     }
@@ -224,8 +241,10 @@ export default class PuzzleScene extends BaseGameScene {
         this.isFailed = true;
         console.log(`[PuzzleScene] Stage ${this.currentStage} FAILED!`);
 
-        // 物理演算を一時停止
-        this.matter.world.pause();
+        // 少し遅らせて物理を止める
+        this.time.delayedCall(10, () => {
+            if (this.matter.world) this.matter.world.pause();
+        });
 
         // 失敗演出
         const failText = this.add.text(
@@ -263,9 +282,7 @@ export default class PuzzleScene extends BaseGameScene {
         const nextStage = this.currentStage + 1;
         this.cameras.main.fadeOut(500, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            if (this.scene.isActive()) {
-                this.scene.restart({ stage: nextStage });
-            }
+            this.scene.restart({ stage: nextStage });
         });
     }
 
@@ -275,9 +292,7 @@ export default class PuzzleScene extends BaseGameScene {
     _retryStage() {
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            if (this.scene.isActive()) {
-                this.scene.restart({ stage: this.currentStage });
-            }
+            this.scene.restart({ stage: this.currentStage });
         });
     }
 

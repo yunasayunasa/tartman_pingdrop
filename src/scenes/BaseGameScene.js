@@ -1037,7 +1037,10 @@ export default class BaseGameScene extends Phaser.Scene {
             // --- ケース2: トリガーが 'onStomp' または 'onHit' の場合 ---
             // 衝突方向の判定が必要
             if (trigger === 'onStomp' || trigger === 'onHit') {
-
+                if (!pair.collision) {
+                    // センサーなどの場合、衝突の詳細情報がないことがあるためスキップ
+                    continue;
+                }
                 // 衝突の法線ベクトルを取得し、sourceObject視点に正規化
                 let collisionNormal = pair.collision.normal;
                 if (sourceObject.body === pair.bodyB) {
