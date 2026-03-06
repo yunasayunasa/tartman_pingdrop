@@ -6,7 +6,7 @@ export default class SoundManager {
         if (!this.configManager) {
             console.error("SoundManager: ConfigManagerが見つかりません！");
         }
-        
+
         this.currentBgm = null;
         this.currentBgmKey = null;
 
@@ -22,7 +22,7 @@ export default class SoundManager {
             this.sound.context.resume().then(() => console.log("SoundManager: AudioContextが再開されました。"));
         }
     }
-    
+
     // コンフィグ画面からの音量変更を即時反映
     onBgmVolumeChange(newVolume) {
         if (this.currentBgm && this.currentBgm.isPlaying) {
@@ -70,11 +70,11 @@ export default class SoundManager {
         });
     }
 
-     /**
-     * ★★★ 音ゲーの心臓部（マスタークロック）★★★
-     * 現在再生中のBGMの再生位置を、ミリ秒単位の数値で返す。
-     * @returns {number | null} 再生中の場合はミリ秒、再生されていない場合はnullを返す。
-     */
+    /**
+    * ★★★ 音ゲーの心臓部（マスタークロック）★★★
+    * 現在再生中のBGMの再生位置を、ミリ秒単位の数値で返す。
+    * @returns {number | null} 再生中の場合はミリ秒、再生されていない場合はnullを返す。
+    */
     getBgmCurrentTimeMs() {
         // currentBgmが存在し、かつ実際に再生中であることを確認
         if (this.currentBgm && this.currentBgm.isPlaying) {
@@ -90,23 +90,23 @@ export default class SoundManager {
  * BGMを再生する (撃ちっぱなし専用バージョン)
  * GameFlowManagerなど、完了を待つ必要がないシステムから呼び出す
  */
-playBgmFireAndForget(key, fadeinTime = 0) {
-    // playBgmの中身とほぼ同じだが、Promiseでラップしない
-    this.resumeContext();
-    if (this.currentBgm && this.currentBgmKey === key && this.currentBgm.isPlaying) return;
-    this.stopBgm(fadeinTime);
-    const targetVolume = this.configManager.getValue('bgmVolume');
-    const newBgm = this.sound.add(key, { loop: true, volume: 0 });
-    newBgm.play();
-    this.currentBgm = newBgm;
-    this.currentBgmKey = key;
-    this.game.scene.getScene('SystemScene').tweens.add({
-        targets: newBgm,
-        volume: targetVolume,
-        duration: fadeinTime,
-        ease: 'Linear'
-    });
-}
+    playBgmFireAndForget(key, fadeinTime = 0) {
+        // playBgmの中身とほぼ同じだが、Promiseでラップしない
+        this.resumeContext();
+        if (this.currentBgm && this.currentBgmKey === key && this.currentBgm.isPlaying) return;
+        this.stopBgm(fadeinTime);
+        const targetVolume = this.configManager.getValue('bgmVolume');
+        const newBgm = this.sound.add(key, { loop: true, volume: 0 });
+        newBgm.play();
+        this.currentBgm = newBgm;
+        this.currentBgmKey = key;
+        this.game.scene.getScene('SystemScene').tweens.add({
+            targets: newBgm,
+            volume: targetVolume,
+            duration: fadeinTime,
+            ease: 'Linear'
+        });
+    }
 
     /**
      * BGMを停止する (フェード対応版)
@@ -115,7 +115,7 @@ playBgmFireAndForget(key, fadeinTime = 0) {
     stopBgm(fadeoutTime = 0) {
         if (this.currentBgm) {
             const bgmToStop = this.currentBgm; // クロージャで参照を保持
-            
+
             if (fadeoutTime > 0) {
                 // フェードアウト
                 this.game.scene.getScene('SystemScene').tweens.add({
@@ -139,30 +139,35 @@ playBgmFireAndForget(key, fadeinTime = 0) {
         }
     }
 
-   // in src/core/SoundManager.js
+    // in src/core/SoundManager.js
 
-     /**
-     * 効果音を再生する (ループ対応・停止可能なバージョン)
-     * @param {string} key - 再生するSEのアセットキー
-     * @param {object} [config] - 追加の設定 (loop, volumeなど)
-     * @returns {Promise<void>} ループしないSEの再生完了時に解決されるPromise
-     */
+    /**
+    * 効果音を再生する (ループ対応・停止可能なバージョン)
+    * @param {string} key - 再生するSEのアセットキー
+    * @param {object} [config] - 追加の設定 (loop, volumeなど)
+    * @returns {Promise<void>} ループしないSEの再生完了時に解決されるPromise
+    */
     playSe(key, config = {}) {
         return new Promise(resolve => {
             this.resumeContext();
-            
+
             // --- もし同じキーのループ音が既に鳴っていたら、一旦止めてから再生 ---
             if (config.loop && this.activeSe.has(key)) {
                 this.stopSe(key);
             }
-            
+
             const baseVolume = this.configManager.getValue('seVolume');
             const finalVolume = (config.volume !== undefined) ? baseVolume * config.volume : baseVolume;
             const finalConfig = { ...config, volume: finalVolume };
 
             const se = this.sound.add(key, finalConfig);
+            if (!se) {
+                console.warn(`[SoundManager] Failed to create sound instance for key: ${key}`);
+                resolve();
+                return;
+            }
             se.play();
-            
+
             // ▼▼▼【ここからが核心の修正です】▼▼▼
             // --------------------------------------------------------------------
             if (config.loop) {
@@ -170,7 +175,7 @@ playBgmFireAndForget(key, fadeinTime = 0) {
                 // 停止できるように、Mapに参照を保存
                 this.activeSe.set(key, se);
                 // ループ音は「再生を開始した」時点で完了とみなし、即座にresolve
-                resolve(); 
+                resolve();
             } else {
                 // --- ループしない場合（これまで通り） ---
                 se.once('complete', (sound) => {
@@ -205,7 +210,7 @@ playBgmFireAndForget(key, fadeinTime = 0) {
         // プロパティの存在だけで判断する方が安定する
         return this.currentBgmKey;
     }
-    
+
     // ゲーム終了時に呼ばれるクリーンアップ処理
     destroy() {
         if (this.configManager) {

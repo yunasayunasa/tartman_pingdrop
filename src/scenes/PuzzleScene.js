@@ -111,7 +111,10 @@ export default class PuzzleScene extends BaseGameScene {
         // SE再生
         const soundManager = this.registry.get('soundManager');
         if (soundManager) {
-            soundManager.playSe('pin_pull');
+            // キャッシュに存在するか確認してから再生
+            if (this.cache.audio.exists('pin_pull')) {
+                soundManager.playSe('pin_pull');
+            }
         }
     }
 
@@ -123,8 +126,8 @@ export default class PuzzleScene extends BaseGameScene {
             if (obj.getData && obj.getData('blockedBy') === pinName) {
                 console.log(`[PuzzleScene] Releasing object blocked by ${pinName}: ${obj.name}`);
                 // isStatic を false にして物理演算を有効化
-                if (obj.body) {
-                    this.matter.body.setStatic(obj.body, false);
+                if (obj.setStatic) {
+                    obj.setStatic(false);
                 }
                 // ignoreGravity を解除
                 obj.setData('ignoreGravity', false);
@@ -163,7 +166,7 @@ export default class PuzzleScene extends BaseGameScene {
 
     _isCharAndTarget(objA, objB, nameA, nameB) {
         return (objA.name === nameA && objB.name === nameB) ||
-               (objA.name === nameB && objB.name === nameA);
+            (objA.name === nameB && objB.name === nameA);
     }
 
     _isCharAndTrap(objA, objB) {
@@ -260,7 +263,9 @@ export default class PuzzleScene extends BaseGameScene {
         const nextStage = this.currentStage + 1;
         this.cameras.main.fadeOut(500, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.restart({ stage: nextStage });
+            if (this.scene.isActive()) {
+                this.scene.restart({ stage: nextStage });
+            }
         });
     }
 
@@ -270,7 +275,9 @@ export default class PuzzleScene extends BaseGameScene {
     _retryStage() {
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
-            this.scene.restart({ stage: this.currentStage });
+            if (this.scene.isActive()) {
+                this.scene.restart({ stage: this.currentStage });
+            }
         });
     }
 
