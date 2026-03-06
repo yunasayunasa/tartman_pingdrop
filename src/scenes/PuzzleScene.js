@@ -111,15 +111,21 @@ export default class PuzzleScene extends BaseGameScene {
      */
     _releaseBlockedObjects(pinName) {
         this.children.list.forEach(obj => {
-            if (obj.getData && obj.getData('blockedBy') === pinName) {
-                console.log(`[PuzzleScene] Releasing object blocked by ${pinName}: ${obj.name}`);
-                // 物理演算を有効化
-                if (obj.setStatic) {
-                    obj.setStatic(false);
+            try {
+                if (obj && obj.active && obj.getData && obj.getData('blockedBy') === pinName) {
+                    console.log(`[PuzzleScene] Releasing object blocked by ${pinName}: ${obj.name}`);
+                    // 物理演算を有効化
+                    if (obj.setStatic) {
+                        obj.setStatic(false);
+                    }
+                    // ignoreGravity を解除
+                    if (obj.setData) {
+                        obj.setData('ignoreGravity', false);
+                        obj.setData('blockedBy', null);
+                    }
                 }
-                // ignoreGravity を解除
-                obj.setData('ignoreGravity', false);
-                obj.setData('blockedBy', null);
+            } catch (e) {
+                console.error(`[PuzzleScene] Error releasing object blocked by ${pinName}:`, e, obj ? obj.name : 'unknown');
             }
         });
     }

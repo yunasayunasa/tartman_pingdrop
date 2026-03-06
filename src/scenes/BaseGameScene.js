@@ -917,18 +917,31 @@ export default class BaseGameScene extends Phaser.Scene {
         // --- 衝突イベント監視 ---
         this.matter.world.on('collisionstart', (event) => {
             if (!event || !event.pairs) return;
+            // console.log(`[CollisionDebug] collisionstart event with ${event.pairs.length} pairs`);
             for (const pair of event.pairs) {
-                if (!pair || !pair.bodyA || !pair.bodyB) continue;
+                if (!pair || !pair.bodyA || !pair.bodyB) {
+                    console.warn('[CollisionDebug] Invalid pair detected', pair);
+                    continue;
+                }
 
                 const objA = pair.bodyA.gameObject;
                 const objB = pair.bodyB.gameObject;
 
                 // 両方のオブジェクトが存在し、かつ破棄されていない場合のみ処理
                 if (objA && objB && objA.active && objB.active) {
-                    this.handleCollision(objA, objB, pair);
+                    try {
+                        this.handleCollision(objA, objB, pair);
+                    } catch (e) {
+                        console.error(`[CollisionDebug] Error in handleCollision(A, B):`, e, { objA: objA.name, objB: objB.name });
+                    }
+
                     // 1つ目のコールでobjA/objBが破棄された可能性も考慮
-                    if (objA.active && objB.active) {
-                        this.handleCollision(objB, objA, pair);
+                    if (objA && objB && objA.active && objB.active) {
+                        try {
+                            this.handleCollision(objB, objA, pair);
+                        } catch (e) {
+                            console.error(`[CollisionDebug] Error in handleCollision(B, A):`, e, { objA: objA.name, objB: objB.name });
+                        }
                     }
                 }
             }
@@ -990,25 +1003,31 @@ export default class BaseGameScene extends Phaser.Scene {
 
 
         // "重なり始め" をエミュレートするためのフラグ管理
-        const overlapKey = `overlap_${targetObject.name || targetObject.id}`;
+        // targetObject.id がない場合を考慮し、Matterのbody.id などもフォールバックに使う
+        const targetId = targetObject.name || (targetObject.body ? targetObject.body.id : 'unknown');
+        const overlapKey = `overlap_${targetId}`;
         const wasOverlapping = sourceObject.getData(overlapKey);
 
-        if (phase === 'active' && !wasOverlapping) {
-            // --- Overlap Start ---
-            sourceObject.setData(overlapKey, true); // 今、重なったことを記録
-            for (const eventData of events) {
-                if (eventData.trigger === 'onOverlap_Start' && eventData.targetGroup === targetObject.getData('group')) {
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
+        try {
+            if (phase === 'active' && !wasOverlapping) {
+                // --- Overlap Start ---
+                sourceObject.setData(overlapKey, true); // 今、重なったことを記録
+                for (const eventData of events) {
+                    if (eventData.trigger === 'onOverlap_Start' && eventData.targetGroup === targetObject.getData('group')) {
+                        actionInterpreter.run(sourceObject, eventData, targetObject);
+                    }
+                }
+            } else if (phase === 'end' && wasOverlapping) {
+                // --- Overlap End ---
+                sourceObject.setData(overlapKey, false); // 重なりが解消したことを記録
+                for (const eventData of events) {
+                    if (eventData.trigger === 'onOverlap_End' && eventData.targetGroup === targetObject.getData('group')) {
+                        actionInterpreter.run(sourceObject, eventData, targetObject);
+                    }
                 }
             }
-        } else if (phase === 'end' && wasOverlapping) {
-            // --- Overlap End ---
-            sourceObject.setData(overlapKey, false); // 重なりが解消したことを記録
-            for (const eventData of events) {
-                if (eventData.trigger === 'onOverlap_End' && eventData.targetGroup === targetObject.getData('group')) {
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
-            }
+        } catch (e) {
+            console.error(`[CollisionDebug] Error in handleOverlap:`, e, { source: sourceObject.name, target: targetObject.name });
         }
     }
 
@@ -1030,51 +1049,42 @@ export default class BaseGameScene extends Phaser.Scene {
         if (!events) return;
 
         for (const eventData of events) {
-            // グループが一致しないイベントは、即座にスキップ
-            if (eventData.targetGroup !== targetObject.getData('group')) {
-                continue;
-            }
-
-            // ▼▼▼【ここが全てのトリガーを正しく捌く、新しいロジックです】▼▼▼
-
-            const trigger = eventData.trigger;
-
-            // --- ケース1: トリガーが 'onCollide_Start' の場合 ---
-            // 方向を問わないので、グループが一致すれば即座にアクションを実行
-            if (trigger === 'onCollide_Start') {
-                // console.log(`%c[Collision] COLLIDE Event: '${sourceObject.name}' collided with '${targetObject.name}'`, 'color: yellow');
-                actionInterpreter.run(sourceObject, eventData, targetObject);
-                // 一致するイベントが見つかったので、このイベント定義に対する処理は終了
-                continue;
-            }
-
-            // --- ケース2: トリガーが 'onStomp' または 'onHit' の場合 ---
-            // 衝突方向の判定が必要
-            if (trigger === 'onStomp' || trigger === 'onHit') {
-                if (!pair.collision) {
-                    // センサーなどの場合、衝突の詳細情報がないことがあるためスキップ
+            try {
+                // グループが一致しないイベントは、即座にスキップ
+                if (eventData.targetGroup !== targetObject.getData('group')) {
                     continue;
                 }
-                // 衝突の法線ベクトルを取得し、sourceObject視点に正規化
-                let collisionNormal = pair.collision.normal;
-                if (sourceObject.body === pair.bodyB) {
-                    collisionNormal = { x: -collisionNormal.x, y: -collisionNormal.y };
+
+                const trigger = eventData.trigger;
+
+                // --- ケース1: トリガーが 'onCollide_Start' の場合 ---
+                if (trigger === 'onCollide_Start') {
+                    actionInterpreter.run(sourceObject, eventData, targetObject);
+                    continue;
                 }
 
-                const isStomp = collisionNormal.y < -0.7; // ほぼ真上からの衝突
-                const isHit = !isStomp; // それ以外は全て 'Hit' とする
+                // --- ケース2: トリガーが 'onStomp' または 'onHit' の場合 ---
+                if (trigger === 'onStomp' || trigger === 'onHit') {
+                    if (!pair.collision) continue;
 
-                if (trigger === 'onStomp' && isStomp) {
-                    // console.log(`%c[Collision] STOMP Event: '${sourceObject.name}' stomped on '${targetObject.name}'`, 'color: lightgreen');
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
+                    let collisionNormal = pair.collision.normal;
+                    if (sourceObject.body === pair.bodyB) {
+                        collisionNormal = { x: -collisionNormal.x, y: -collisionNormal.y };
+                    }
+
+                    const isStomp = collisionNormal.y < -0.7;
+                    const isHit = !isStomp;
+
+                    if (trigger === 'onStomp' && isStomp) {
+                        actionInterpreter.run(sourceObject, eventData, targetObject);
+                    }
+                    else if (trigger === 'onHit' && isHit) {
+                        actionInterpreter.run(sourceObject, eventData, targetObject);
+                    }
                 }
-                else if (trigger === 'onHit' && isHit) {
-                    // console.log(`%c[Collision] HIT Event: '${sourceObject.name}' was hit by '${targetObject.name}'`, 'color: orange');
-                    actionInterpreter.run(sourceObject, eventData, targetObject);
-                }
+            } catch (e) {
+                console.error(`[CollisionDebug] Error in handleCollision loop for trigger ${eventData.trigger}:`, e);
             }
-
-            // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
         }
     }
 
@@ -1351,10 +1361,10 @@ export default class BaseGameScene extends Phaser.Scene {
     }
 
     /**
-   * ★★★ 最終確定版：シーンの状態スナップショットを作成する ★★★
-   * 全てのオブジェクトのTransform情報と、シリアライズ可能な全コンポーネントの状態を保存する。
-   * @returns {object} シーンの永続化可能な状態
-   */
+    * ★★★ 最終確定版：シーンの状態スナップショットを作成する ★★★
+    * 全てのオブジェクトのTransform情報と、シリアライズ可能な全コンポーネントの状態を保存する。
+    * @returns {object} シーンの永続化可能な状態
+    */
     createSceneSnapshot() {
         const snapshot = {
             sceneKey: this.scene.key,
