@@ -11,19 +11,18 @@ export default class PuzzleScene extends BaseGameScene {
         this.totalStages = 10;
         this.isCleared = false;
         this.isFailed = false;
-        this.pins = [];        // シーン内のピンオブジェクトの参照
-        this.traps = [];       // シーン内の罠オブジェクトの参照
-        this.character = null;  // キャラクターオブジェクト
-        this.treasure = null;   // 宝オブジェクト
+        this.pins = [];
+        this.traps = [];
+        this.character = null;
+        this.treasure = null;
+        this._charMoveSpeed = 120; // px/sec
     }
 
     init(data) {
         super.init(data);
-        // ステージ番号を受け取る
         if (data && data.stage) {
             this.currentStage = data.stage;
         }
-        // ステージに応じたlayoutDataKeyを設定
         this.layoutDataKey = `PuzzleStage${this.currentStage}`;
         this.isCleared = false;
         this.isFailed = false;
@@ -41,7 +40,6 @@ export default class PuzzleScene extends BaseGameScene {
     onSetupComplete() {
         console.log(`[PuzzleScene] Stage ${this.currentStage} setup complete.`);
 
-        // シーン内のオブジェクトを分類して参照を保持
         this.children.list.forEach(obj => {
             const objName = obj.name || '';
             if (objName.startsWith('pin_')) {
@@ -56,83 +54,123 @@ export default class PuzzleScene extends BaseGameScene {
             }
         });
 
-        // ステージ番号テキスト表示
         this._createStageUI();
-
-        // 衝突判定の設定
         this._setupCollisions();
-
-        // シーン準備完了を通知
+        this._addPinHoverEffect();
         this.events.emit('scene-ready');
     }
 
-    /**
-     * ピンオブジェクトにクリック/タップ操作を設定
-     */
+    // ─────────────────────────────────────────────
+    // ピン操作
+    // ─────────────────────────────────────────────
+
     _setupPin(pinObj) {
         pinObj.setInteractive({ useHandCursor: true });
+        // ホバーで明るく
+        pinObj.on('pointerover', () => {
+            if (!this.isCleared && !this.isFailed) pinObj.setAlpha(0.7);
+        });
+        pinObj.on('pointerout', () => pinObj.setAlpha(1));
         pinObj.on('pointerdown', () => {
             if (this.isCleared || this.isFailed) return;
             this._pullPin(pinObj);
         });
     }
 
-    /**
-     * ピンを抜く処理
-     */
+    _addPinHoverEffect() {
+        // ピンに「↑」マーカーを追加してタップ誘導
+        this.pins.forEach(pin => {
+            const marker = this.add.text(pin.x, pin.y - 30, '↑', {
+                fontSize: '18px', fill: '#FFFF00', stroke: '#000', strokeThickness: 2
+            }).setOrigin(0.5).setDepth(20);
+            this.tweens.add({
+                targets: marker,
+                y: pin.y - 42,
+                yoyo: true,
+                repeat: -1,
+                duration: 500,
+                ease: 'Sine.easeInOut'
+            });
+            // pinが破棄されたらmarkerも消す
+            pin.on('destroy', () => { if (marker.active) marker.destroy(); });
+        });
+    }
+
     _pullPin(pinObj) {
         const pinName = pinObj.name;
-        console.log(`[PuzzleScene] Pulling pin: ${pinName}`);
+        // 既に抜き中なら無視
+        if (pinObj.getData('pulling')) return;
+        pinObj.setData('pulling', true);
 
-        // ピンを抜くアニメーション（上方向にスライドして消える）
+        this._playSe('pin_pull');
+
+        // 抜くアニメーション（上方向）
         this.tweens.add({
             targets: pinObj,
-            y: pinObj.y - 120,
+            y: pinObj.y - 100,
             alpha: 0,
-            duration: 400,
+            duration: 350,
             ease: 'Cubic.easeIn',
             onComplete: () => {
-                // blockedByでこのピンに紐づけられた要素を解放
                 this._releaseBlockedObjects(pinName);
-                // オブジェクトを破棄
                 pinObj.destroy();
             }
         });
-
-        // SE再生
-        const soundManager = this.registry.get('soundManager');
-        if (soundManager && this.cache.audio.exists('pin_pull')) {
-            soundManager.playSe('pin_pull');
-        }
     }
 
-    /**
-     * ピンによってせき止められていたオブジェクトを解放する
-     */
     _releaseBlockedObjects(pinName) {
         this.children.list.forEach(obj => {
             try {
                 if (obj && obj.active && obj.getData && obj.getData('blockedBy') === pinName) {
-                    console.log(`[PuzzleScene] Releasing object blocked by ${pinName}: ${obj.name}`);
-                    // 物理演算を有効化
-                    if (obj.setStatic) {
-                        obj.setStatic(false);
+                    console.log(`[PuzzleScene] Releasing: ${obj.name}`);
+                    // destroyOnRelease フラグがあればそのまま消す（ゲートウォール等）
+                    if (obj.getData('destroyOnRelease')) {
+                        this.time.delayedCall(0, () => { if (obj.active) obj.destroy(); });
+                        return;
                     }
-                    // ignoreGravity を解除
+                    if (obj.setStatic) obj.setStatic(false);
                     if (obj.setData) {
                         obj.setData('ignoreGravity', false);
                         obj.setData('blockedBy', null);
                     }
                 }
             } catch (e) {
-                console.error(`[PuzzleScene] Error releasing object blocked by ${pinName}:`, e, obj ? obj.name : 'unknown');
+                console.error('[PuzzleScene] Release error:', e);
             }
         });
     }
 
-    /**
-     * 衝突判定の設定
-     */
+    // ─────────────────────────────────────────────
+    // キャラクター自動移動
+    // ─────────────────────────────────────────────
+
+    _updateCharacterMovement() {
+        if (!this.character || !this.treasure) return;
+        if (!this.character.active || !this.character.body) return;
+
+        const dx = this.treasure.x - this.character.x;
+        const absDx = Math.abs(dx);
+
+        // 宝に十分近ければ速度ゼロ（衝突で終わるのでここには来ないが念のため）
+        if (absDx < 5) return;
+
+        const dir = dx > 0 ? 1 : -1;
+        const speed = this._charMoveSpeed / 60;
+
+        try {
+            this.matter.body.setVelocity(this.character.body, {
+                x: dir * speed,
+                y: this.character.body.velocity.y
+            });
+        } catch (e) {
+            // bodyが無効な場合は無視
+        }
+    }
+
+    // ─────────────────────────────────────────────
+    // 衝突判定
+    // ─────────────────────────────────────────────
+
     _setupCollisions() {
         this.matter.world.on('collisionstart', (event) => {
             if (this.isCleared || this.isFailed || !event || !event.pairs) return;
@@ -140,29 +178,31 @@ export default class PuzzleScene extends BaseGameScene {
             event.pairs.forEach(pair => {
                 const objA = pair.bodyA ? pair.bodyA.gameObject : null;
                 const objB = pair.bodyB ? pair.bodyB.gameObject : null;
-
                 if (!objA || !objB || !objA.active || !objB.active) return;
 
-                // キャラクター vs 宝 → クリア
+                // キャラ → 宝
                 if (this._isCharAndTarget(objA, objB, 'character', 'treasure')) {
                     this._onStageClear();
                 }
-
-                // キャラクター vs 罠 → 失敗
+                // キャラ → 罠（溶岩・魔物など）
                 if (this._isCharAndTrap(objA, objB)) {
                     this._onStageFail();
                 }
-
-                // 水 vs 溶岩 → 岩に変化
+                // 水 + 溶岩 → 岩
                 if (this._isWaterAndLava(objA, objB)) {
                     this._onWaterLavaReaction(objA, objB);
+                }
+                // 魔物 + 溶岩 → 共に消滅
+                if (this._isMonsterAndLava(objA, objB)) {
+                    this._onMonsterLavaReaction(objA, objB);
                 }
             });
         });
     }
+
     _isCharAndTarget(objA, objB, nameA, nameB) {
         return (objA.name === nameA && objB.name === nameB) ||
-            (objA.name === nameB && objB.name === nameA);
+               (objA.name === nameB && objB.name === nameA);
     }
 
     _isCharAndTrap(objA, objB) {
@@ -176,61 +216,118 @@ export default class PuzzleScene extends BaseGameScene {
     _isWaterAndLava(objA, objB) {
         const aIsWater = (objA.name || '').includes('water');
         const bIsWater = (objB.name || '').includes('water');
-        const aIsLava = (objA.name || '').includes('lava');
-        const bIsLava = (objB.name || '').includes('lava');
+        const aIsLava  = (objA.name || '').includes('lava');
+        const bIsLava  = (objB.name || '').includes('lava');
         return (aIsWater && bIsLava) || (bIsWater && aIsLava);
     }
-    /**
-     * 水と溶岩が反応して岩になる処理
-     */
+
+    _isMonsterAndLava(objA, objB) {
+        const aIsMon  = (objA.name || '').includes('monster');
+        const bIsMon  = (objB.name || '').includes('monster');
+        const aIsLava = (objA.name || '').includes('lava');
+        const bIsLava = (objB.name || '').includes('lava');
+        return (aIsMon && bIsLava) || (bIsMon && aIsLava);
+    }
+
+    // ─────────────────────────────────────────────
+    // 反応処理
+    // ─────────────────────────────────────────────
+
+    /** 水 + 溶岩 → 岩（無害化） */
     _onWaterLavaReaction(objA, objB) {
         if (!objA.active || !objB.active) return;
-
-        const lavaObj = (objA.name || '').includes('lava') ? objA : objB;
+        const lavaObj  = (objA.name || '').includes('lava')  ? objA : objB;
         const waterObj = (objA.name || '').includes('water') ? objA : objB;
+        console.log('[PuzzleScene] Water + Lava = Rock!');
 
-        console.log(`[PuzzleScene] Reaction: Water + Lava = Rock!`);
-
-        // 溶岩を岩に変える（色を変える、罠属性を消す）
         if (lavaObj.active) {
-            lavaObj.setFillStyle(0x555555); // グレー（岩の色）
-            lavaObj.name = 'rock'; // 名前を変えて罠判定から外す
+            lavaObj.setFillStyle(0x888888);
+            lavaObj.name = 'rock';
         }
+        this._playSe('reaction');
+        this.time.delayedCall(0, () => {
+            if (waterObj.active) waterObj.destroy();
+        });
+        // 煙エフェクト
+        this._spawnSmoke(lavaObj.x, lavaObj.y);
+    }
 
-        // 水は消滅させる。衝突ループ内での破壊を避けるため、次のフレームで実行
-        if (waterObj.active) {
-            this.time.delayedCall(0, () => {
-                if (waterObj.active) waterObj.destroy();
+    /** 魔物 + 溶岩 → 共に消滅 */
+    _onMonsterLavaReaction(objA, objB) {
+        if (!objA.active || !objB.active) return;
+        const monObj  = (objA.name || '').includes('monster') ? objA : objB;
+        const lavaObj = (objA.name || '').includes('lava')    ? objA : objB;
+        console.log('[PuzzleScene] Monster + Lava = Both destroyed!');
+
+        this._playSe('reaction');
+        this._spawnSmoke(lavaObj.x, lavaObj.y);
+
+        this.time.delayedCall(0, () => {
+            if (monObj.active)  monObj.destroy();
+            if (lavaObj.active) lavaObj.destroy();
+        });
+    }
+
+    // ─────────────────────────────────────────────
+    // 煙エフェクト（Graphicsでパーティクル代替）
+    // ─────────────────────────────────────────────
+
+    _spawnSmoke(x, y) {
+        for (let i = 0; i < 6; i++) {
+            const circle = this.add.circle(
+                x + Phaser.Math.Between(-20, 20),
+                y + Phaser.Math.Between(-10, 10),
+                Phaser.Math.Between(6, 14),
+                0xcccccc, 0.8
+            ).setDepth(50);
+            this.tweens.add({
+                targets: circle,
+                y: circle.y - Phaser.Math.Between(30, 60),
+                alpha: 0,
+                scaleX: 2, scaleY: 2,
+                duration: Phaser.Math.Between(400, 700),
+                ease: 'Power1',
+                onComplete: () => circle.destroy()
             });
         }
     }
 
-    /**
-     * ステージクリア処理
-     */
+    // ─────────────────────────────────────────────
+    // クリア / 失敗
+    // ─────────────────────────────────────────────
+
     _onStageClear() {
         if (this.isCleared) return;
         this.isCleared = true;
         console.log(`[PuzzleScene] Stage ${this.currentStage} CLEARED!`);
 
-        // 少し遅らせて物理を止める（イベントループ外で安全に）
+        this._playSe('clear');
         this.time.delayedCall(10, () => {
             if (this.matter.world) this.matter.world.pause();
         });
 
-        // クリア演出
+        // キャラをその場で止めて喜ぶ演出
+        if (this.character && this.character.active) {
+            this.tweens.add({
+                targets: this.character,
+                y: this.character.y - 20,
+                yoyo: true,
+                duration: 200,
+                repeat: 2
+            });
+        }
+
         const clearText = this.add.text(
             this.cameras.main.centerX,
-            this.cameras.main.centerY - 60,
-            '🎉 STAGE CLEAR!',
-            { fontSize: '48px', fill: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }
-        ).setOrigin(0.5).setDepth(1000).setAlpha(0);
+            this.cameras.main.centerY - 80,
+            'STAGE CLEAR!',
+            { fontSize: '52px', fill: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold',
+              stroke: '#000', strokeThickness: 5 }
+        ).setOrigin(0.5).setDepth(1000).setAlpha(0).setScale(0.5);
 
         this.tweens.add({
             targets: clearText,
-            alpha: 1,
-            scaleX: 1.2,
-            scaleY: 1.2,
+            alpha: 1, scaleX: 1, scaleY: 1,
             duration: 500,
             ease: 'Back.easeOut',
             onComplete: () => {
@@ -245,25 +342,34 @@ export default class PuzzleScene extends BaseGameScene {
         });
     }
 
-    /**
-     * ステージ失敗処理
-     */
     _onStageFail() {
         if (this.isFailed) return;
         this.isFailed = true;
         console.log(`[PuzzleScene] Stage ${this.currentStage} FAILED!`);
 
-        // 少し遅らせて物理を止める
+        this._playSe('fail');
+        // 画面シェイク
+        this.cameras.main.shake(400, 0.015);
+
         this.time.delayedCall(10, () => {
             if (this.matter.world) this.matter.world.pause();
         });
 
-        // 失敗演出
+        // 赤フラッシュ
+        const flash = this.add.rectangle(
+            this.cameras.main.centerX, this.cameras.main.centerY,
+            this.cameras.main.width, this.cameras.main.height,
+            0xff0000, 0.4
+        ).setDepth(999);
+        this.tweens.add({ targets: flash, alpha: 0, duration: 500,
+            onComplete: () => flash.destroy() });
+
         const failText = this.add.text(
             this.cameras.main.centerX,
-            this.cameras.main.centerY - 60,
-            '💀 FAILED...',
-            { fontSize: '48px', fill: '#FF4444', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 4 }
+            this.cameras.main.centerY - 80,
+            'FAILED...',
+            { fontSize: '52px', fill: '#FF4444', fontFamily: 'Arial', fontStyle: 'bold',
+              stroke: '#000', strokeThickness: 5 }
         ).setOrigin(0.5).setDepth(1000).setAlpha(0);
 
         this.tweens.add({
@@ -272,24 +378,22 @@ export default class PuzzleScene extends BaseGameScene {
             duration: 400,
             ease: 'Power2',
             onComplete: () => {
-                // リトライボタン
                 const retryBtn = this.add.text(
                     this.cameras.main.centerX,
-                    this.cameras.main.centerY + 40,
+                    this.cameras.main.centerY + 20,
                     '🔄 RETRY',
-                    { fontSize: '36px', fill: '#FFFFFF', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }
+                    { fontSize: '36px', fill: '#FFFFFF', fontFamily: 'Arial',
+                      fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }
                 ).setOrigin(0.5).setDepth(1000).setInteractive({ useHandCursor: true });
-
-                retryBtn.on('pointerdown', () => {
-                    this._retryStage();
-                });
+                retryBtn.on('pointerdown', () => this._retryStage());
             }
         });
     }
 
-    /**
-     * 次のステージへ遷移
-     */
+    // ─────────────────────────────────────────────
+    // ナビゲーション
+    // ─────────────────────────────────────────────
+
     _goToNextStage() {
         const nextStage = this.currentStage + 1;
         this.cameras.main.fadeOut(500, 0, 0, 0);
@@ -298,9 +402,6 @@ export default class PuzzleScene extends BaseGameScene {
         });
     }
 
-    /**
-     * 現在のステージをリトライ
-     */
     _retryStage() {
         this.cameras.main.fadeOut(300, 0, 0, 0);
         this.cameras.main.once('camerafadeoutcomplete', () => {
@@ -308,42 +409,51 @@ export default class PuzzleScene extends BaseGameScene {
         });
     }
 
-    /**
-     * 全ステージクリア
-     */
     _onGameClear() {
         EngineAPI.fireGameFlowEvent('GAME_CLEAR');
     }
 
-    /**
-     * ステージUI（ステージ番号）の作成
-     */
+    // ─────────────────────────────────────────────
+    // UI
+    // ─────────────────────────────────────────────
+
     _createStageUI() {
-        // ステージ番号
         this.add.text(
-            this.cameras.main.centerX,
-            30,
+            this.cameras.main.centerX, 30,
             `STAGE ${this.currentStage} / ${this.totalStages}`,
-            { fontSize: '28px', fill: '#FFFFFF', fontFamily: 'Arial', fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }
+            { fontSize: '28px', fill: '#FFFFFF', fontFamily: 'Arial',
+              fontStyle: 'bold', stroke: '#000', strokeThickness: 3 }
         ).setOrigin(0.5).setDepth(999).setScrollFactor(0);
 
-        // リトライボタン（常時表示）
-        const retryAlways = this.add.text(
-            this.cameras.main.width - 30,
-            30,
-            '🔄',
+        const retryBtn = this.add.text(
+            this.cameras.main.width - 30, 30, '🔄',
             { fontSize: '32px' }
-        ).setOrigin(1, 0.5).setDepth(999).setScrollFactor(0).setInteractive({ useHandCursor: true });
+        ).setOrigin(1, 0.5).setDepth(999).setScrollFactor(0)
+         .setInteractive({ useHandCursor: true });
 
-        retryAlways.on('pointerdown', () => {
-            if (!this.isCleared && !this.isFailed) {
-                this._retryStage();
-            }
+        retryBtn.on('pointerdown', () => {
+            if (!this.isCleared && !this.isFailed) this._retryStage();
         });
     }
+
+    // ─────────────────────────────────────────────
+    // サウンドユーティリティ
+    // ─────────────────────────────────────────────
+
+    _playSe(key) {
+        try {
+            const sm = this.registry.get('soundManager');
+            if (sm && this.cache.audio.exists(key)) sm.playSe(key);
+        } catch (e) { /* 未登録SEは無視 */ }
+    }
+
+    // ─────────────────────────────────────────────
+    // ゲームループ
+    // ─────────────────────────────────────────────
 
     update(time, delta) {
         if (this.isCleared || this.isFailed) return;
         super.update(time, delta);
+        this._updateCharacterMovement();
     }
 }
