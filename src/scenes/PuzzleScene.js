@@ -8,7 +8,7 @@ export default class PuzzleScene extends BaseGameScene {
     constructor() {
         super({ key: 'PuzzleScene' });
         this.currentStage = 1;
-        this.totalStages = 10;
+        this.totalStages = 20;
         this.isCleared = false;
         this.isFailed = false;
         this.pins = [];
@@ -17,6 +17,8 @@ export default class PuzzleScene extends BaseGameScene {
         this.treasure = null;
         this._charMoveSpeed = 120; // px/sec
         this._reacted = new Set(); // 反応済みペアの追跡（重複防止）
+        this._startTime = 0;
+        this._pinsPulled = 0;
     }
 
     init(data) {
@@ -30,6 +32,8 @@ export default class PuzzleScene extends BaseGameScene {
         this.character = null;
         this.treasure  = null;
         this._reacted  = new Set();
+        this._startTime = 0;
+        this._pinsPulled = 0;
     }
 
     create() {
@@ -48,6 +52,7 @@ export default class PuzzleScene extends BaseGameScene {
             else if (n.startsWith('trap_')) this.traps.push(obj);
         });
 
+        this._startTime = this.time.now;
         this._createStageUI();
         this._setupCollisions();   // collisionstart / collisionactive
         this._addVisualEnhancements();
@@ -72,12 +77,17 @@ export default class PuzzleScene extends BaseGameScene {
         if (pinObj.getData('pulling')) return;
         pinObj.setData('pulling', true);
         this._playSe('pin_pull');
+        this._pinsPulled++;
 
+        // ピンを横に引き抜く（スクリーン中央から遠い方向へスライド）
+        const pullDir = pinObj.x < this.cameras.main.centerX ? -1 : 1;
         this.tweens.add({
             targets: pinObj,
-            y: pinObj.y - 100,
+            x: pinObj.x + pullDir * 220,
+            y: pinObj.y - 30,
+            angle: pullDir * 25,
             alpha: 0,
-            duration: 350,
+            duration: 320,
             ease: 'Cubic.easeIn',
             onComplete: () => {
                 this._releaseBlockedObjects(pinObj.name);
@@ -430,10 +440,26 @@ export default class PuzzleScene extends BaseGameScene {
     // クリア / 失敗
     // ─────────────────────────────────────────────
 
+    _calcStars() {
+        const elapsed = (this.time.now - this._startTime) / 1000;
+        if (elapsed < 12) return 3;
+        if (elapsed < 25) return 2;
+        return 1;
+    }
+
+    _saveStars(stars) {
+        const key = `pinpuzzle_stars_${this.currentStage}`;
+        const prev = parseInt(localStorage.getItem(key) || '0', 10);
+        if (stars > prev) localStorage.setItem(key, String(stars));
+    }
+
     _onStageClear() {
         if (this.isCleared) return;
         this.isCleared = true;
         console.log(`[PuzzleScene] Stage ${this.currentStage} CLEARED!`);
+
+        const stars = this._calcStars();
+        this._saveStars(stars);
 
         this._playSe('clear');
         this.time.delayedCall(10, () => { if (this.matter.world) this.matter.world.pause(); });
@@ -444,37 +470,66 @@ export default class PuzzleScene extends BaseGameScene {
         }
 
         // 紙吹雪パーティクル代替
-        for (let i = 0; i < 12; i++) {
-            this.time.delayedCall(i * 60, () => {
+        for (let i = 0; i < 16; i++) {
+            this.time.delayedCall(i * 50, () => {
                 const dot = this.add.circle(
                     Phaser.Math.Between(100, this.cameras.main.width - 100),
-                    Phaser.Math.Between(100, 300),
-                    Phaser.Math.Between(4, 10),
+                    Phaser.Math.Between(50, 250),
+                    Phaser.Math.Between(4, 12),
                     Phaser.Display.Color.RandomRGB().color
                 ).setDepth(900).setAlpha(0.9);
-                this.tweens.add({ targets: dot, y: dot.y + 300, alpha: 0, duration: 900, onComplete: () => dot.destroy() });
+                this.tweens.add({ targets: dot, y: dot.y + 380, alpha: 0, duration: 1000, onComplete: () => dot.destroy() });
             });
         }
 
         const cx = this.cameras.main.centerX;
         const cy = this.cameras.main.centerY;
 
-        // CLEAR 背景板
-        const bg = this.add.rectangle(cx, cy - 60, 500, 120, 0x000000, 0.65).setDepth(999).setScale(0);
-        // CLEAR テキスト
-        const txt = this.add.text(cx, cy - 60, '✨ STAGE CLEAR! ✨', {
+        const starStr = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+
+        // CLEAR パネル（少し大きめ）
+        const bg = this.add.rectangle(cx, cy - 40, 560, 200, 0x000000, 0.72).setDepth(999).setScale(0);
+        const txt = this.add.text(cx, cy - 80, '✨ STAGE CLEAR! ✨', {
             fontSize: '44px', color: '#FFD700', fontFamily: 'Arial', fontStyle: 'bold',
             stroke: '#000', strokeThickness: 5
         }).setOrigin(0.5).setDepth(1000).setAlpha(0).setScale(0.5);
+        const starTxt = this.add.text(cx, cy - 30, starStr, {
+            fontSize: '48px'
+        }).setOrigin(0.5).setDepth(1000).setAlpha(0);
 
         this.tweens.add({
-            targets: [bg, txt], alpha: 1, scaleX: 1, scaleY: 1,
+            targets: [bg, txt, starTxt], alpha: 1, scaleX: 1, scaleY: 1,
             duration: 500, ease: 'Back.easeOut',
             onComplete: () => {
-                this.time.delayedCall(1500, () => {
-                    if (this.currentStage < this.totalStages) this._goToNextStage();
-                    else this._onGameClear();
-                });
+                if (this.currentStage < this.totalStages) {
+                    const nextBtn = this.add.text(cx + 90, cy + 50, '▶  NEXT', {
+                        fontSize: '28px', color: '#FFFFFF', fontFamily: 'Arial', fontStyle: 'bold',
+                        stroke: '#000', strokeThickness: 3,
+                        backgroundColor: '#1a6b2a', padding: { x: 16, y: 8 }
+                    }).setOrigin(0.5).setDepth(1000).setInteractive({ useHandCursor: true });
+                    nextBtn.on('pointerover', () => nextBtn.setAlpha(0.8));
+                    nextBtn.on('pointerout',  () => nextBtn.setAlpha(1.0));
+                    nextBtn.on('pointerdown', () => this._goToNextStage());
+                }
+
+                const selBtn = this.add.text(
+                    this.currentStage < this.totalStages ? cx - 90 : cx,
+                    cy + 50,
+                    '📋  SELECT', {
+                    fontSize: '28px', color: '#FFFFFF', fontFamily: 'Arial', fontStyle: 'bold',
+                    stroke: '#000', strokeThickness: 3,
+                    backgroundColor: '#334466', padding: { x: 16, y: 8 }
+                }).setOrigin(0.5).setDepth(1000).setInteractive({ useHandCursor: true });
+                selBtn.on('pointerover', () => selBtn.setAlpha(0.8));
+                selBtn.on('pointerout',  () => selBtn.setAlpha(1.0));
+                selBtn.on('pointerdown', () => this._goToStageSelect());
+
+                if (this.currentStage >= this.totalStages) {
+                    this.add.text(cx, cy - 110, '🎉 ALL STAGES COMPLETE! 🎉', {
+                        fontSize: '28px', color: '#FF69B4', fontFamily: 'Arial', fontStyle: 'bold',
+                        stroke: '#000', strokeThickness: 3
+                    }).setOrigin(0.5).setDepth(1000);
+                }
             }
         });
     }
@@ -534,8 +589,13 @@ export default class PuzzleScene extends BaseGameScene {
         this.cameras.main.once('camerafadeoutcomplete', () => this.scene.restart({ stage: this.currentStage }));
     }
 
+    _goToStageSelect() {
+        this.cameras.main.fadeOut(400, 0, 0, 0);
+        this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('StageSelectScene'));
+    }
+
     _onGameClear() {
-        EngineAPI.fireGameFlowEvent('GAME_CLEAR');
+        this._goToStageSelect();
     }
 
     // ─────────────────────────────────────────────

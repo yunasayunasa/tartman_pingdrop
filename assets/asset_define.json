@@ -108,7 +108,17 @@
         "PuzzleStage7.json",
         "PuzzleStage8.json",
         "PuzzleStage9.json",
-        "PuzzleStage10.json"
+        "PuzzleStage10.json",
+        "PuzzleStage11.json",
+        "PuzzleStage12.json",
+        "PuzzleStage13.json",
+        "PuzzleStage14.json",
+        "PuzzleStage15.json",
+        "PuzzleStage16.json",
+        "PuzzleStage17.json",
+        "PuzzleStage18.json",
+        "PuzzleStage19.json",
+        "PuzzleStage20.json"
       ]
     },
     "//": "--- ここにタイルセット用の定義を追加 ---",

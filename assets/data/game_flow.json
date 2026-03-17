@@ -6,8 +6,7 @@
         {
           "type": "transitionTo",
           "params": {
-            "scene": "PuzzleScene",
-            "stage": 1
+            "scene": "StageSelectScene"
           }
         }
       ],
